@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./three_mens_morris/Cargo.toml"
+    ]
+}
