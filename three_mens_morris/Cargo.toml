@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 colored="2.1.0"
+diesel = { version = "2.1.5", features = ["sqlite"] }
+dotenv = "0.15.0"
+rand = "0.8.5"
