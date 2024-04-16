@@ -52,6 +52,62 @@ impl fmt::Display for GameError {
 
 impl std::error::Error for GameError {}
 
+pub struct StupidBot {
+
+}
+
+impl StupidBot {
+    fn needs_defense (&self, state: &State) -> Result<(), (usize, usize)> {
+        // inputs current state and output coordinate of urgent defense
+        // ok if does not need defense. Err if needed.
+        let blocking_row;
+        let blocking_col;
+        let opponent: u8 = match state.turn {
+            1 => 2,
+            2 => 1,
+            _ => 0,
+        };
+
+        let board = &state.board;
+        
+        // iter through row
+        for i in 0..3 {
+            // opponent will win if any diagonal or horizontal line has two pieces and is not blocked by the bot.
+            // check row
+            let opponent_count_row = board[i].iter().filter(|&&x| x == opponent).count();
+            if opponent_count_row == 2 && board[i].iter().any(|&x| x == 0) {
+                blocking_row = i as usize;
+                blocking_col = board[i].iter().position(|&x| x == 0).unwrap();
+                return Err((blocking_row, blocking_col));
+            }
+
+            // Check columns
+            let opponent_count_col = board.iter().map(|row| row[i]).filter(|&x| x == opponent).count();
+            if opponent_count_col == 2 && board.iter().any(|row| row[i] == 0) {
+                blocking_row = board.iter().position(|row| row[i] == 0).unwrap();
+                blocking_col = i as usize;
+                return Err((blocking_row, blocking_col))
+            }
+        }
+    
+        // Check diagonals
+        let diag_left = (0..3).map(|i| board[i][i]).filter(|&x| x == opponent).count();
+        let diag_right = (0..3).map(|i| board[i][2-i]).filter(|&x| x == opponent).count();
+        if diag_left == 2 && (0..3).any(|i| board[i][i] == 0) {
+            // coordinates are the same for left diagonal.
+            blocking_row = (0..3).position(|i| board[i][i] == 0).unwrap();
+            return Err((blocking_row, blocking_row));
+        }
+        if diag_right == 2 && (0..3).any(|i| board[i][2-i] == 0) {
+            blocking_row = (0..3).position(|i| board[i][2-i] == 0).unwrap();
+            blocking_col = 2 - (0..3).position(|i| board[i][2-i] == 0).unwrap();
+            return Err((blocking_row, blocking_col));
+        }
+
+        Ok(())
+    }
+}
+
 pub struct Move {
     // Move is a human-readible symantic move record
     col: char,
@@ -142,6 +198,7 @@ pub struct Game {
     current_state: State,
     winner: char,
     player_mode: u8,
+    stupid_bot: StupidBot,
 }
 
 impl Game {
@@ -152,6 +209,7 @@ impl Game {
             current_state: State::new(),
             winner: ' ',
             player_mode: 2,
+            stupid_bot: StupidBot {},
         }
     }
 
@@ -235,6 +293,15 @@ impl Game {
             match self.validate_move(&new_move) {
                 Ok(()) => {
                     self.register_move(new_move);
+                    // TODO: temporary hint to test stupid bot. remove when bot is done.
+                    match self.stupid_bot.needs_defense(&self.current_state) {
+                        Ok(()) => {
+                            println!("No immediate need to defend.");
+                        },
+                        Err((row, col)) => {
+                            println!("({}, {}) needs defending next turn.", row, col);
+                        }
+                    }
                 },
                 Err(e) => {
                     println!("{}", e);
