@@ -1,21 +1,38 @@
+use colored::*;
 use std::fmt;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::time::{SystemTime, UNIX_EPOCH};
-use colored::*;
 
 #[derive(Debug)]
 pub enum GameError {
     // move related errors
-    DuplicatePlay { player: char },
-    PlaceOccupied { row: usize, col: usize },
-    MaxPiecePlayed { player: char },
-    NoPieceToMove { row: usize, col: usize },
-    IncorrectOwnership { player: char, row: usize, col: usize },
+    DuplicatePlay {
+        player: char,
+    },
+    PlaceOccupied {
+        row: usize,
+        col: usize,
+    },
+    MaxPiecePlayed {
+        player: char,
+    },
+    NoPieceToMove {
+        row: usize,
+        col: usize,
+    },
+    IncorrectOwnership {
+        player: char,
+        row: usize,
+        col: usize,
+    },
     InvalidMove {},
-    NotPlayedAllPieces { player: char },
-    CustomError { message: &'static str },
-
+    NotPlayedAllPieces {
+        player: char,
+    },
+    CustomError {
+        message: &'static str,
+    },
     // input related errors
 }
 
@@ -35,13 +52,21 @@ impl fmt::Display for GameError {
                 write!(f, "({}, {}) has no piece to move!", row, col)
             }
             GameError::IncorrectOwnership { player, row, col } => {
-                write!(f, "Piece on ({}, {}) does not belong to player {}!", row, col, player)
+                write!(
+                    f,
+                    "Piece on ({}, {}) does not belong to player {}!",
+                    row, col, player
+                )
             }
             GameError::InvalidMove {} => {
                 write!(f, "The move is not valid!")
             }
             GameError::NotPlayedAllPieces { player } => {
-                write!(f, "Player {} must play remaining pieces to start moving existing pieces!", player)
+                write!(
+                    f,
+                    "Player {} must play remaining pieces to start moving existing pieces!",
+                    player
+                )
             }
             GameError::CustomError { message } => {
                 write!(f, "Custom error: {}", message)
@@ -52,16 +77,16 @@ impl fmt::Display for GameError {
 
 impl std::error::Error for GameError {}
 
-pub struct StupidBot {
-
-}
+pub struct StupidBot {}
 
 impl StupidBot {
-    fn needs_defense (&self, state: &State) -> Result<(), (usize, usize)> {
-        // inputs current state and output coordinate of urgent defense
+    // TODO: add a case where no moves can be made to be the winning case.
+    fn get_critical_position(&self, state: &State) -> Result<Vec<(u8, usize, usize)>, ()> {
+        // inputs current state and output coordinates of urgent defense and their owners
         // ok if does not need defense. Err if needed.
-        let blocking_row;
-        let blocking_col;
+        let mut critical_moves: Vec<(u8, usize, usize)> = Vec::new();
+        let mut critical_row;
+        let mut critical_col;
         let opponent: u8 = match state.turn {
             1 => 2,
             2 => 1,
@@ -69,42 +94,55 @@ impl StupidBot {
         };
 
         let board = &state.board;
-        
-        // iter through row
-        for i in 0..3 {
-            // opponent will win if any diagonal or horizontal line has two pieces and is not blocked by the bot.
-            // check row
-            let opponent_count_row = board[i].iter().filter(|&&x| x == opponent).count();
-            if opponent_count_row == 2 && board[i].iter().any(|&x| x == 0) {
-                blocking_row = i as usize;
-                blocking_col = board[i].iter().position(|&x| x == 0).unwrap();
-                return Err((blocking_row, blocking_col));
+
+        // opponent will win if any diagonal or horizontal line has two pieces and is not blocked by the bot.
+        // and you will win if you have two of your pieces in a line.
+        for player in [opponent, state.turn] {
+            // iter through row
+            for i in 0..3 {
+                // check row
+                let count_row = board[i].iter().filter(|&&x| x == player).count();
+                if count_row == 2 && board[i].iter().any(|&x| x == 0) {
+                    critical_row = i as usize;
+                    critical_col = board[i].iter().position(|&x| x == 0).unwrap();
+                    critical_moves.push((player, critical_row, critical_col));
+                }
+
+                // Check columns
+                let count_col = board
+                    .iter()
+                    .map(|row| row[i])
+                    .filter(|&x| x == player)
+                    .count();
+                if count_col == 2 && board.iter().any(|row| row[i] == 0) {
+                    critical_row = board.iter().position(|row| row[i] == 0).unwrap();
+                    critical_col = i as usize;
+                    critical_moves.push((player, critical_row, critical_col));
+                }
             }
 
-            // Check columns
-            let opponent_count_col = board.iter().map(|row| row[i]).filter(|&x| x == opponent).count();
-            if opponent_count_col == 2 && board.iter().any(|row| row[i] == 0) {
-                blocking_row = board.iter().position(|row| row[i] == 0).unwrap();
-                blocking_col = i as usize;
-                return Err((blocking_row, blocking_col))
+            // Check diagonals
+            let diag_left = (0..3).map(|i| board[i][i]).filter(|&x| x == player).count();
+            let diag_right = (0..3)
+                .map(|i| board[i][2 - i])
+                .filter(|&x| x == player)
+                .count();
+            if diag_left == 2 && (0..3).any(|i| board[i][i] == 0) {
+                // coordinates are the same for left diagonal.
+                critical_row = (0..3).position(|i| board[i][i] == 0).unwrap();
+                critical_moves.push((player, critical_row, critical_row));
+            }
+            if diag_right == 2 && (0..3).any(|i| board[i][2 - i] == 0) {
+                critical_row = (0..3).position(|i| board[i][2 - i] == 0).unwrap();
+                critical_col = 2 - (0..3).position(|i| board[i][2 - i] == 0).unwrap();
+                critical_moves.push((player, critical_row, critical_col));
             }
         }
-    
-        // Check diagonals
-        let diag_left = (0..3).map(|i| board[i][i]).filter(|&x| x == opponent).count();
-        let diag_right = (0..3).map(|i| board[i][2-i]).filter(|&x| x == opponent).count();
-        if diag_left == 2 && (0..3).any(|i| board[i][i] == 0) {
-            // coordinates are the same for left diagonal.
-            blocking_row = (0..3).position(|i| board[i][i] == 0).unwrap();
-            return Err((blocking_row, blocking_row));
-        }
-        if diag_right == 2 && (0..3).any(|i| board[i][2-i] == 0) {
-            blocking_row = (0..3).position(|i| board[i][2-i] == 0).unwrap();
-            blocking_col = 2 - (0..3).position(|i| board[i][2-i] == 0).unwrap();
-            return Err((blocking_row, blocking_col));
-        }
 
-        Ok(())
+        if critical_moves.is_empty() {
+            return Err(());
+        }
+        Ok(critical_moves)
     }
 }
 
@@ -118,40 +156,29 @@ pub struct Move {
 
 impl Move {
     pub fn is_new_move(&self) -> bool {
-        return self.new_row.is_none()
+        return self.new_row.is_none();
     }
-    
+
     pub fn new_as_coord(&self) -> (usize, usize) {
         match self.col {
-            'A' | 'a' => {
-                return (self.row as usize - 1, 0)
-            },
-            'B' | 'b' => {
-                return (self.row as usize - 1, 1)
-            },
-            'C' | 'c' => {
-                return (self.row as usize - 1, 2)
-            },
-            _ => return (3, 3)
+            'A' | 'a' => return (self.row as usize - 1, 0),
+            'B' | 'b' => return (self.row as usize - 1, 1),
+            'C' | 'c' => return (self.row as usize - 1, 2),
+            _ => return (3, 3),
         }
     }
 
     pub fn move_as_coord(&self) -> (usize, usize) {
-        if self.is_new_move() { return (3, 3) };
+        if self.is_new_move() {
+            return (3, 3);
+        };
         match self.new_col.unwrap() {
-            'A' | 'a' => {
-                return (self.new_row.unwrap() as usize - 1, 0)
-            },
-            'B' | 'b' => {
-                return (self.new_row.unwrap() as usize - 1, 1)
-            },
-            'C' | 'c' => {
-                return (self.new_row.unwrap() as usize - 1, 2)
-            },
-            _ => return (3, 3)
+            'A' | 'a' => return (self.new_row.unwrap() as usize - 1, 0),
+            'B' | 'b' => return (self.new_row.unwrap() as usize - 1, 1),
+            'C' | 'c' => return (self.new_row.unwrap() as usize - 1, 2),
+            _ => return (3, 3),
         }
     }
-
 }
 
 #[derive(Clone)]
@@ -214,7 +241,9 @@ impl Game {
     }
 
     pub fn write_history(&self) {
-        let time = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backward?");
+        let time = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backward?");
         let timestamp = time.as_secs();
         let path = format!("{}.csv", timestamp);
         let mut file = OpenOptions::new()
@@ -235,31 +264,29 @@ impl Game {
         let words: Vec<&str> = input.split_whitespace().collect();
         if words.len() != 1 {
             println!("Limit your input to one argument!");
-            return false
+            return false;
         }
         let mode: u8 = match words[0].parse() {
-            Ok(num) => {
-                num
-            },
+            Ok(num) => num,
             Err(_) => {
                 println!("Error parsing player mode.");
-                return false
-            },
+                return false;
+            }
         };
         match mode {
             1 => {
                 self.player_mode = mode;
                 println!("Single player mode selected.");
-                return true
-            },
+                return true;
+            }
             2 => {
                 self.player_mode = mode;
                 println!("Multi player mode selected.");
-                return true
-            },
+                return true;
+            }
             _ => {
                 println!("Unsupported player mode.");
-                return false
+                return false;
             }
         }
     }
@@ -272,7 +299,7 @@ impl Game {
         }
 
         self.print_current_board();
-       
+
         while self.winner == ' ' {
             println!("Current state:");
             println!("{}", self.current_state.get_state());
@@ -294,15 +321,17 @@ impl Game {
                 Ok(()) => {
                     self.register_move(new_move);
                     // TODO: temporary hint to test stupid bot. remove when bot is done.
-                    match self.stupid_bot.needs_defense(&self.current_state) {
-                        Ok(()) => {
+                    match self.stupid_bot.get_critical_position(&self.current_state) {
+                        Ok(critical_moves) => {
+                            for (player, row, col) in critical_moves {
+                                println!("Player {} has a chance to win at ({}, {}) ", player, row, col);
+                            }
+                        }
+                        Err(()) => {
                             println!("No immediate need to defend.");
-                        },
-                        Err((row, col)) => {
-                            println!("({}, {}) needs defending next turn.", row, col);
                         }
                     }
-                },
+                }
                 Err(e) => {
                     println!("{}", e);
                     println!("Let's try this again.");
@@ -314,24 +343,19 @@ impl Game {
                 Ok(win) => {
                     if win {
                         match self.current_state.turn {
-                            1 => {
-                                self.winner = 'o'
-                            },
-                            2 => {
-                                self.winner = 'x'
-                            },
-                            _ => {
-                                self.winner = ' '
-                            }
+                            // turns are flipped because next turn is already updated.
+                            1 => self.winner = 'x',
+                            2 => self.winner = 'o',
+                            _ => self.winner = ' ',
                         }
                         println!("Player {} is the winner!", self.winner);
                         self.print_current_board();
                     }
-                },
-                Err(_) => { println!("Unknown error!") }
+                }
+                Err(_) => {
+                    println!("Unknown error!")
+                }
             }
-
-            
         }
         println!("Game over!");
         self.print_move_history();
@@ -344,10 +368,10 @@ impl Game {
             match i % 2 {
                 0 => {
                     player = 'o';
-                },
+                }
                 1 => {
                     player = 'x';
-                },
+                }
                 _ => {
                     // TODO: handle error
                     player = ' ';
@@ -356,9 +380,15 @@ impl Game {
 
             if current_move.new_row.is_none() {
                 println!("{}: {}{} ", player, current_move.col, current_move.row);
-            }
-            else {
-                println!("{}: {}{}->{}{}", player, current_move.col, current_move.row, current_move.new_col.unwrap(), current_move.new_row.unwrap());
+            } else {
+                println!(
+                    "{}: {}{}->{}{}",
+                    player,
+                    current_move.col,
+                    current_move.row,
+                    current_move.new_col.unwrap(),
+                    current_move.new_row.unwrap()
+                );
             }
         }
     }
@@ -367,27 +397,24 @@ impl Game {
         // Print current board on cli
         println!("  a   b   c");
         for (i, row) in self.current_state.board.iter().enumerate() {
-            print!("{} ", i+1);
+            print!("{} ", i + 1);
             for (j, &cell) in row.iter().enumerate() {
                 let char_rep = match cell {
                     1 => 'o',
                     2 => 'x',
-                    _ => ' '
+                    _ => ' ',
                 };
                 if j == row.len() - 1 {
                     print!("{}\n", char_rep);
-                }
-                else {
+                } else {
                     print!("{} {} ", char_rep, "-".red());
                 }
             }
             if i == 0 {
                 println!("  {}", "| \\ | / |".red());
-            }
-            else if i == 1 {
+            } else if i == 1 {
                 println!("  {}", "| / | \\ |".red());
-            }
-            else {
+            } else {
                 println!();
             }
         }
@@ -397,7 +424,7 @@ impl Game {
         // before updating current state, save it to history
         self.state_history.push(self.current_state.clone());
         // apply on current board first
-        let ( row_coord, col_coord ) = _move.new_as_coord();
+        let (row_coord, col_coord) = _move.new_as_coord();
         // new piece
         if _move.is_new_move() {
             self.current_state.board[row_coord][col_coord] = self.current_state.turn;
@@ -405,18 +432,22 @@ impl Game {
         // moving piece
         else {
             self.current_state.board[row_coord][col_coord] = 0;
-            let ( new_row_coord, new_col_coord ) = _move.move_as_coord();
+            let (new_row_coord, new_col_coord) = _move.move_as_coord();
             self.current_state.board[new_row_coord][new_col_coord] = self.current_state.turn;
         }
         match self.current_state.turn {
             1 => {
                 self.current_state.turn = 2;
-                if self.current_state.player_one_remaining > 0 { self.current_state.player_one_remaining -= 1 };
-            },
+                if self.current_state.player_one_remaining > 0 {
+                    self.current_state.player_one_remaining -= 1
+                };
+            }
             2 => {
                 self.current_state.turn = 1;
-                if self.current_state.player_two_remaining > 0 { self.current_state.player_two_remaining -= 1 };
-            },
+                if self.current_state.player_two_remaining > 0 {
+                    self.current_state.player_two_remaining -= 1
+                };
+            }
             _ => (),
         }
 
@@ -426,7 +457,13 @@ impl Game {
         self.print_current_board();
     }
 
-    pub fn is_valid_move(&self, old_row: usize, old_col: usize, new_row: usize, new_col: usize) -> bool {
+    pub fn is_valid_move(
+        &self,
+        old_row: usize,
+        old_col: usize,
+        new_row: usize,
+        new_col: usize,
+    ) -> bool {
         // possible moves:
         // +/- column
         // +/- row
@@ -439,17 +476,17 @@ impl Game {
             ((1, 0), (2, 1)),
             ((2, 1), (1, 2)),
         ];
-        
+
         let current_move = ((old_row, old_col), (new_row, new_col));
         let reverse_move = ((new_row, new_col), (old_row, old_col));
 
         if exceptions.contains(&current_move) || exceptions.contains(&reverse_move) {
-            return false
+            return false;
         }
 
         let row_diff = (old_row as i32 - new_row as i32).abs();
         let col_diff = (old_col as i32 - new_col as i32).abs();
-        
+
         row_diff <= 1 && col_diff <= 1
     }
 
@@ -457,20 +494,22 @@ impl Game {
         let board = &self.current_state.board;
         for i in 0..3 {
             if (board[i][0] != 0 && board[i][0] == board[i][1] && board[i][0] == board[i][2])
-                || (board[0][i] != 0 && board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
+                || (board[0][i] != 0 && board[0][i] == board[1][i] && board[0][i] == board[2][i])
+            {
                 self.write_history();
-                return Ok(true)
+                return Ok(true);
             }
         }
-    
+
         // Check diagonals
         if (board[0][0] != 0 && board[0][0] == board[1][1] && board[0][0] == board[2][2])
-            || (board[0][2] != 0 && board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
+            || (board[0][2] != 0 && board[0][2] == board[1][1] && board[0][2] == board[2][0])
+        {
             self.write_history();
-            return Ok(true)
+            return Ok(true);
         }
 
-        return Ok(false)
+        return Ok(false);
     }
 
     pub fn validate_move(&mut self, _move: &Move) -> Result<(), GameError> {
@@ -486,52 +525,75 @@ impl Game {
         if _move.is_new_move() {
             // check if place already has a piece
             if self.current_state.board[row_coord][col_coord] != 0 {
-                return Err(GameError::PlaceOccupied { row: row_coord, col: col_coord });
+                return Err(GameError::PlaceOccupied {
+                    row: row_coord,
+                    col: col_coord,
+                });
             }
             match self.current_state.turn {
                 1 => {
                     if self.current_state.player_one_remaining == 0 {
-                        return Err(GameError::MaxPiecePlayed { player: current_player });
+                        return Err(GameError::MaxPiecePlayed {
+                            player: current_player,
+                        });
                     }
                 }
                 2 => {
                     if self.current_state.player_two_remaining == 0 {
-                        return Err(GameError::MaxPiecePlayed { player: current_player });
+                        return Err(GameError::MaxPiecePlayed {
+                            player: current_player,
+                        });
                     }
-                },
+                }
                 _ => {
-                    return Err(GameError::CustomError { message: "unknown turn." })
+                    return Err(GameError::CustomError {
+                        message: "unknown turn.",
+                    })
                 }
             }
-            return Ok(())
+            return Ok(());
         }
 
         // moving existing piece
         // validate if piece exists to move
         if self.current_state.board[row_coord][col_coord] == 0 {
-            return Err(GameError::NoPieceToMove { row: row_coord, col: col_coord })
+            return Err(GameError::NoPieceToMove {
+                row: row_coord,
+                col: col_coord,
+            });
         }
         // validate if all remaining pieces are played.
-        if self.current_state.player_one_remaining > 0 || self.current_state.player_two_remaining > 0 {
-            return Err(GameError::NotPlayedAllPieces { player: current_player })
+        if self.current_state.player_one_remaining > 0
+            || self.current_state.player_two_remaining > 0
+        {
+            return Err(GameError::NotPlayedAllPieces {
+                player: current_player,
+            });
         }
         // validate if initial position belongs to player
         if self.current_state.turn != self.current_state.board[row_coord][col_coord] {
-            return Err(GameError::IncorrectOwnership { player: current_player, row: row_coord, col: col_coord });
+            return Err(GameError::IncorrectOwnership {
+                player: current_player,
+                row: row_coord,
+                col: col_coord,
+            });
         }
         // try unwrapping new row and new columns
         // convert new col and row to cartesian coordinates
         let (new_row_coord, new_col_coord) = _move.move_as_coord();
         // validate if new position is not occupied
         if self.current_state.board[new_row_coord][new_col_coord] != 0 {
-            return Err(GameError::PlaceOccupied { row: new_row_coord, col: new_col_coord })
+            return Err(GameError::PlaceOccupied {
+                row: new_row_coord,
+                col: new_col_coord,
+            });
         }
         // player can only move to connected grid.
         if !self.is_valid_move(row_coord, col_coord, new_row_coord, new_col_coord) {
-            return Err(GameError::InvalidMove {})
+            return Err(GameError::InvalidMove {});
         }
-        
-        return Ok(())
+
+        return Ok(());
     }
 
     pub fn convert_str_to_row_col(&self, move_entry: &str) -> Result<(char, u8), &'static str> {
@@ -548,11 +610,11 @@ impl Game {
 
         // Validate row and column entries
         if (row < 1) && (row > 3) {
-            return Err("Invalid row argument!")
+            return Err("Invalid row argument!");
         };
         let valid_cols = vec!['a', 'b', 'c', 'A', 'B', 'C'];
         if !valid_cols.contains(&col) {
-            return Err("Invalid column argument!")
+            return Err("Invalid column argument!");
         };
 
         Ok((col, row))
@@ -561,10 +623,10 @@ impl Game {
     pub fn validate_input(&mut self, input: Vec<&str>) -> Result<Move, &'static str> {
         // validate_input takes input vector and outputs Move
         // column is from a to c, row is from 1 to 3
-        if input.len() > 2{
-            return Err("Incorrect amount of arguments.")
+        if input.len() > 2 {
+            return Err("Incorrect amount of arguments.");
         }
-        
+
         // check col and row from second argument
         let row;
         let col;
@@ -572,20 +634,18 @@ impl Game {
             Ok((parsed_col, parsed_row)) => {
                 row = parsed_row;
                 col = parsed_col;
-            },
-            Err(err) => return Err(err)
+            }
+            Err(err) => return Err(err),
         }
 
         // New move.
         if input.len() == 1 {
-            return Ok(
-                Move {
-                    col: col,
-                    row: row,
-                    new_col: None,
-                    new_row: None,
-                }
-            )
+            return Ok(Move {
+                col: col,
+                row: row,
+                new_col: None,
+                new_row: None,
+            });
         };
 
         // check new col and new row
@@ -596,17 +656,16 @@ impl Game {
             Ok((parsed_col, parsed_row)) => {
                 new_row = parsed_row;
                 new_col = parsed_col;
-            },
-            Err(err) => return Err(err)
+            }
+            Err(err) => return Err(err),
         }
 
         Ok(Move {
-                col: col,
-                row: row,
-                new_col: Some(new_col),
-                new_row: Some(new_row),
-            }
-        )
+            col: col,
+            row: row,
+            new_col: Some(new_col),
+            new_row: Some(new_row),
+        })
     }
 }
 
