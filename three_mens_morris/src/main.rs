@@ -4,6 +4,20 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use rand::Rng;
+
+mod referee;
+use crate::referee::Referee;
+
+mod state;
+use crate::state::State;
+
+mod move_def;
+use crate::move_def::Move;
+
+mod stupid_bot;
+use crate::stupid_bot::StupidBot;
+
 #[derive(Debug)]
 pub enum GameError {
     // move related errors
@@ -77,147 +91,6 @@ impl fmt::Display for GameError {
 
 impl std::error::Error for GameError {}
 
-pub struct StupidBot {}
-
-impl StupidBot {
-    // TODO: add a case where no moves can be made to be the winning case.
-    fn get_critical_position(&self, state: &State) -> Result<Vec<(u8, usize, usize)>, ()> {
-        // inputs current state and output coordinates of urgent defense and their owners
-        // ok if does not need defense. Err if needed.
-        let mut critical_moves: Vec<(u8, usize, usize)> = Vec::new();
-        let mut critical_row;
-        let mut critical_col;
-        let opponent: u8 = match state.turn {
-            1 => 2,
-            2 => 1,
-            _ => 0,
-        };
-
-        let board = &state.board;
-
-        // opponent will win if any diagonal or horizontal line has two pieces and is not blocked by the bot.
-        // and you will win if you have two of your pieces in a line.
-        for player in [opponent, state.turn] {
-            // iter through row
-            for i in 0..3 {
-                // check row
-                let count_row = board[i].iter().filter(|&&x| x == player).count();
-                if count_row == 2 && board[i].iter().any(|&x| x == 0) {
-                    critical_row = i as usize;
-                    critical_col = board[i].iter().position(|&x| x == 0).unwrap();
-                    critical_moves.push((player, critical_row, critical_col));
-                }
-
-                // Check columns
-                let count_col = board
-                    .iter()
-                    .map(|row| row[i])
-                    .filter(|&x| x == player)
-                    .count();
-                if count_col == 2 && board.iter().any(|row| row[i] == 0) {
-                    critical_row = board.iter().position(|row| row[i] == 0).unwrap();
-                    critical_col = i as usize;
-                    critical_moves.push((player, critical_row, critical_col));
-                }
-            }
-
-            // Check diagonals
-            let diag_left = (0..3).map(|i| board[i][i]).filter(|&x| x == player).count();
-            let diag_right = (0..3)
-                .map(|i| board[i][2 - i])
-                .filter(|&x| x == player)
-                .count();
-            if diag_left == 2 && (0..3).any(|i| board[i][i] == 0) {
-                // coordinates are the same for left diagonal.
-                critical_row = (0..3).position(|i| board[i][i] == 0).unwrap();
-                critical_moves.push((player, critical_row, critical_row));
-            }
-            if diag_right == 2 && (0..3).any(|i| board[i][2 - i] == 0) {
-                critical_row = (0..3).position(|i| board[i][2 - i] == 0).unwrap();
-                critical_col = 2 - (0..3).position(|i| board[i][2 - i] == 0).unwrap();
-                critical_moves.push((player, critical_row, critical_col));
-            }
-        }
-
-        if critical_moves.is_empty() {
-            return Err(());
-        }
-        Ok(critical_moves)
-    }
-}
-
-pub struct Move {
-    // Move is a human-readible symantic move record
-    col: char,
-    row: u8,
-    new_col: Option<char>,
-    new_row: Option<u8>,
-}
-
-impl Move {
-    pub fn is_new_move(&self) -> bool {
-        return self.new_row.is_none();
-    }
-
-    pub fn new_as_coord(&self) -> (usize, usize) {
-        match self.col {
-            'A' | 'a' => return (self.row as usize - 1, 0),
-            'B' | 'b' => return (self.row as usize - 1, 1),
-            'C' | 'c' => return (self.row as usize - 1, 2),
-            _ => return (3, 3),
-        }
-    }
-
-    pub fn move_as_coord(&self) -> (usize, usize) {
-        if self.is_new_move() {
-            return (3, 3);
-        };
-        match self.new_col.unwrap() {
-            'A' | 'a' => return (self.new_row.unwrap() as usize - 1, 0),
-            'B' | 'b' => return (self.new_row.unwrap() as usize - 1, 1),
-            'C' | 'c' => return (self.new_row.unwrap() as usize - 1, 2),
-            _ => return (3, 3),
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct State {
-    turn: u8, // 1 for 1st player, 2 for 2nd player
-    player_one_remaining: u8,
-    player_two_remaining: u8,
-    board: [[u8; 3]; 3], // (row x col x 3) matrix where 0 is empty, 1 is 1st player, and 2 is 2nd player
-}
-
-impl State {
-    pub fn new() -> State {
-        State {
-            turn: 1,
-            player_one_remaining: 3,
-            player_two_remaining: 3,
-            board: [[0; 3]; 3],
-        }
-    }
-
-    pub fn get_state(&self) -> String {
-        // Print current state in NN input format
-        // first print current turn (1 or 2)
-        // second, print number of piece left to play for players
-        // third, print 3x3 from a1, a2, ... c2, c3 (0 if empty, 1 or 2)
-        let mut state = vec![
-            self.turn.to_string(),
-            self.player_one_remaining.to_string(),
-            self.player_two_remaining.to_string(),
-        ];
-        for row in 0..3 {
-            for col in 0..3 {
-                state.push(self.board[row][col].to_string());
-            }
-        }
-        state.join(",")
-    }
-}
-
 pub struct Game {
     // column, and row
     moves: Vec<Move>,
@@ -225,7 +98,7 @@ pub struct Game {
     current_state: State,
     winner: char,
     player_mode: u8,
-    stupid_bot: StupidBot,
+    bot: StupidBot,
 }
 
 impl Game {
@@ -236,7 +109,7 @@ impl Game {
             current_state: State::new(),
             winner: ' ',
             player_mode: 2,
-            stupid_bot: StupidBot {},
+            bot: StupidBot::new(),
         }
     }
 
@@ -257,107 +130,181 @@ impl Game {
         }
     }
 
-    pub fn get_player_mode(&mut self) -> bool {
+    pub fn get_player_mode(&mut self) -> Result<(), ()> {
         let mut input = String::new();
         println!("Please enter 1 for single player mode or 2 for multiplayer mode:");
         std::io::stdin().read_line(&mut input).unwrap();
         let words: Vec<&str> = input.split_whitespace().collect();
         if words.len() != 1 {
             println!("Limit your input to one argument!");
-            return false;
+            return Err(());
         }
         let mode: u8 = match words[0].parse() {
             Ok(num) => num,
             Err(_) => {
                 println!("Error parsing player mode.");
-                return false;
+                return Err(());
             }
         };
         match mode {
             1 => {
                 self.player_mode = mode;
                 println!("Single player mode selected.");
-                return true;
+                println!("Fight against stupid bot.");
+                // 1: player goes first, 2: bot goes first
+                let mut rng = rand::thread_rng();
+                let number: u8 = rng.gen_range(1..=2);
+                match number {
+                    1 => {
+                        self.bot.set_player(1);
+                        println!("Bot is set to player one.");
+                    }
+                    2 => {
+                        self.bot.set_player(2);
+                        println!("Bot is set to player two.");
+                    }
+                    _ => {
+                        return Err(());
+                    }
+                }
+                return Ok(());
             }
             2 => {
                 self.player_mode = mode;
                 println!("Multi player mode selected.");
-                return true;
+                return Ok(());
             }
             _ => {
                 println!("Unsupported player mode.");
-                return false;
+                return Ok(());
             }
+        }
+    }
+
+    fn multi_player(&mut self) -> u8 {
+        // loop until there is a winner
+        loop {
+            // get input
+            let new_move = match self.get_user_input() {
+                Ok(ok_move) => ok_move,
+                Err(()) => return 0,
+            };
+            // register input and move on if move is valid
+            match self.validate_move(&new_move) {
+                Ok(()) => {
+                    self.register_move(&new_move);
+                    let winner = self.check_win();
+                    if winner != 0 {
+                        return winner;
+                    };
+                    self.update_next_state();
+                }
+                Err(e) => {
+                    println!("{}", e);
+                    println!("Let's try this again.");
+                }
+            }
+        }
+    }
+
+    fn single_player(&mut self) -> u8 {
+        // loop until there is a winner
+        loop {
+            let mut new_move = Move::new();
+            // let bot check if it is his turn first
+            if self.bot.get_player() == self.current_state.turn {
+                // random move is already validated
+                match self.bot.make_random_move(&self.current_state) {
+                    Ok(bot_move) => {
+                        new_move = bot_move;
+                        println!("bot move {} {} {:?} {:?}", new_move.row, new_move.col, new_move.new_row, new_move.new_col);
+                        if new_move.is_new_move() {
+                            println!("Bot has played {}{}", new_move.col, new_move.row);
+                        } else {
+                            println!(
+                                "Bot has played {}{} -> {:?}{:?}",
+                                new_move.col, new_move.row, new_move.new_col, new_move.new_row
+                            );
+                        }
+                    }
+                    Err(()) => {
+                        println!("Bot had an error making a move.");
+                    }
+                }
+            }
+            // player register new move
+            else {
+                loop {
+                    new_move = match self.get_user_input() {
+                        Ok(ok_move) => ok_move,
+                        Err(()) => return 0,
+                    };
+                    // register input and move on if move is valid
+                    match self.validate_move(&new_move) {
+                        Ok(()) => {break}
+                        Err(e) => {
+                            println!("{}", e);
+                            println!("Error validating the move.");
+                            continue
+                        }
+                    }
+                }
+            }
+
+            self.register_move(&new_move);
+            let winner = self.check_win();
+            if winner != 0 {
+                return winner;
+            };
+            self.update_next_state();
+        }
+    }
+
+    fn get_user_input(&self) -> Result<Move, ()> {
+        loop {
+            println!("Please enter some input: ");
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+            // print!("\x1B[2J\x1B[1;1H");
+            let words: Vec<&str> = input.split_whitespace().collect();
+            match self.validate_input(words) {
+                Ok(new_move) => return Ok(new_move),
+                Err(e) => {
+                    println!("{}", e);
+                    println!("Let's try this again.");
+                }
+            };
         }
     }
 
     pub fn start(&mut self) {
         println!("Welcome to Three Men's Morris!");
-        let mut player_mode_valid = false;
-        while !player_mode_valid {
-            player_mode_valid = self.get_player_mode();
+        loop {
+            match self.get_player_mode() {
+                Ok(()) => break,
+                Err(()) => {
+                    println!("Wrong player mode!");
+                    return;
+                }
+            }
         }
 
         self.print_current_board();
 
-        while self.winner == ' ' {
-            println!("Current state:");
-            println!("{}", self.current_state.get_state());
-            let mut input = String::new();
-            println!("Please enter some input: ");
-            std::io::stdin().read_line(&mut input).unwrap();
-            // print!("\x1B[2J\x1B[1;1H");
-            let words: Vec<&str> = input.split_whitespace().collect();
-            let new_move = match self.validate_input(words) {
-                Ok(_move) => _move,
-                Err(e) => {
-                    println!("{}", e);
-                    println!("Let's try this again.");
-                    continue;
-                }
-            };
-
-            match self.validate_move(&new_move) {
-                Ok(()) => {
-                    self.register_move(new_move);
-                    // TODO: temporary hint to test stupid bot. remove when bot is done.
-                    match self.stupid_bot.get_critical_position(&self.current_state) {
-                        Ok(critical_moves) => {
-                            for (player, row, col) in critical_moves {
-                                println!("Player {} has a chance to win at ({}, {}) ", player, row, col);
-                            }
-                        }
-                        Err(()) => {
-                            println!("No immediate need to defend.");
-                        }
-                    }
-                }
-                Err(e) => {
-                    println!("{}", e);
-                    println!("Let's try this again.");
-                    continue;
-                }
+        let mut winner = 0;
+        println!("Current state:");
+        println!("{}", self.current_state.get_state());
+        match self.player_mode {
+            1 => {
+                winner = self.single_player();
             }
-
-            match self.validate_win() {
-                Ok(win) => {
-                    if win {
-                        match self.current_state.turn {
-                            // turns are flipped because next turn is already updated.
-                            1 => self.winner = 'x',
-                            2 => self.winner = 'o',
-                            _ => self.winner = ' ',
-                        }
-                        println!("Player {} is the winner!", self.winner);
-                        self.print_current_board();
-                    }
-                }
-                Err(_) => {
-                    println!("Unknown error!")
-                }
+            2 => {
+                winner = self.multi_player();
             }
+            _ => (),
         }
-        println!("Game over!");
+        println!("Player {} is the winner!", winner);
+        self.print_current_board();
         self.print_move_history();
     }
 
@@ -420,7 +367,7 @@ impl Game {
         }
     }
 
-    pub fn register_move(&mut self, _move: Move) {
+    pub fn register_move(&mut self, _move: &Move) {
         // before updating current state, save it to history
         self.state_history.push(self.current_state.clone());
         // apply on current board first
@@ -435,15 +382,14 @@ impl Game {
             let (new_row_coord, new_col_coord) = _move.move_as_coord();
             self.current_state.board[new_row_coord][new_col_coord] = self.current_state.turn;
         }
+
         match self.current_state.turn {
             1 => {
-                self.current_state.turn = 2;
                 if self.current_state.player_one_remaining > 0 {
                     self.current_state.player_one_remaining -= 1
                 };
             }
             2 => {
-                self.current_state.turn = 1;
                 if self.current_state.player_two_remaining > 0 {
                     self.current_state.player_two_remaining -= 1
                 };
@@ -453,51 +399,31 @@ impl Game {
 
         println!("Move has been registered:");
         // record Move to move history
-        self.moves.push(_move);
+        self.moves.push(_move.clone());
         self.print_current_board();
     }
 
-    pub fn is_valid_move(
-        &self,
-        old_row: usize,
-        old_col: usize,
-        new_row: usize,
-        new_col: usize,
-    ) -> bool {
-        // possible moves:
-        // +/- column
-        // +/- row
-        // col+1 and row+1
-        // col-1 and row-1
-        // It calculates the absolute difference between the old and new row and column, and checks if these differences are at most 1.
-        let exceptions = vec![
-            ((0, 1), (1, 0)),
-            ((0, 1), (1, 2)),
-            ((1, 0), (2, 1)),
-            ((2, 1), (1, 2)),
-        ];
-
-        let current_move = ((old_row, old_col), (new_row, new_col));
-        let reverse_move = ((new_row, new_col), (old_row, old_col));
-
-        if exceptions.contains(&current_move) || exceptions.contains(&reverse_move) {
-            return false;
+    pub fn update_next_state(&mut self) {
+        match self.current_state.turn {
+            1 => {
+                self.current_state.turn = 2;
+            }
+            2 => {
+                self.current_state.turn = 1;
+            }
+            _ => (),
         }
-
-        let row_diff = (old_row as i32 - new_row as i32).abs();
-        let col_diff = (old_col as i32 - new_col as i32).abs();
-
-        row_diff <= 1 && col_diff <= 1
     }
 
-    pub fn validate_win(&self) -> Result<bool, &'static str> {
+    pub fn check_win(&self) -> u8 {
         let board = &self.current_state.board;
+        let mut game_over = false;
         for i in 0..3 {
             if (board[i][0] != 0 && board[i][0] == board[i][1] && board[i][0] == board[i][2])
                 || (board[0][i] != 0 && board[0][i] == board[1][i] && board[0][i] == board[2][i])
             {
                 self.write_history();
-                return Ok(true);
+                game_over = true;
             }
         }
 
@@ -506,13 +432,17 @@ impl Game {
             || (board[0][2] != 0 && board[0][2] == board[1][1] && board[0][2] == board[2][0])
         {
             self.write_history();
-            return Ok(true);
+            game_over = true;
         }
 
-        return Ok(false);
+        if game_over {
+            return self.current_state.turn;
+        } else {
+            return 0;
+        };
     }
 
-    pub fn validate_move(&mut self, _move: &Move) -> Result<(), GameError> {
+    pub fn validate_move(&self, _move: &Move) -> Result<(), GameError> {
         // validate_move takes Move and outputs error if invalid.
         let (row_coord, col_coord) = _move.new_as_coord();
         let current_player = match self.current_state.turn {
@@ -589,7 +519,7 @@ impl Game {
             });
         }
         // player can only move to connected grid.
-        if !self.is_valid_move(row_coord, col_coord, new_row_coord, new_col_coord) {
+        if !Referee::is_valid_move(row_coord, col_coord, new_row_coord, new_col_coord) {
             return Err(GameError::InvalidMove {});
         }
 
@@ -620,7 +550,7 @@ impl Game {
         Ok((col, row))
     }
 
-    pub fn validate_input(&mut self, input: Vec<&str>) -> Result<Move, &'static str> {
+    pub fn validate_input(&self, input: Vec<&str>) -> Result<Move, &'static str> {
         // validate_input takes input vector and outputs Move
         // column is from a to c, row is from 1 to 3
         if input.len() > 2 {
