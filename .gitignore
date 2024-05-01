@@ -15,3 +15,5 @@ Cargo.lock
 
 # don't save game history
 *.csv
+
+.DS_Store

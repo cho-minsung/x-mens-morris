@@ -1,22 +1,26 @@
 use colored::*;
+use mongodb::bson::oid::ObjectId;
 use std::fmt;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rand::Rng;
+use uuid::Uuid;
 
-mod referee;
-use crate::referee::Referee;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use mongodb::{
+    bson::doc,
+    options::{ClientOptions, ServerApi, ServerApiVersion},
+    Client, Collection,
+};
 
-mod state;
-use crate::state::State;
-
-mod move_def;
-use crate::move_def::Move;
-
-mod stupid_bot;
-use crate::stupid_bot::StupidBot;
+use three_mens_morris::move_def::Move;
+use three_mens_morris::referee::Referee;
+use three_mens_morris::state::State;
+use three_mens_morris::stupid_bot::StupidBot;
+use three_mens_morris::database::TmmClient;
+use three_mens_morris::types::GameHistory;
 
 #[derive(Debug)]
 pub enum GameError {
@@ -217,7 +221,10 @@ impl Game {
                 match self.bot.make_random_move(&self.current_state) {
                     Ok(bot_move) => {
                         new_move = bot_move;
-                        println!("bot move {} {} {:?} {:?}", new_move.row, new_move.col, new_move.new_row, new_move.new_col);
+                        println!(
+                            "bot move {} {} {:?} {:?}",
+                            new_move.row, new_move.col, new_move.new_row, new_move.new_col
+                        );
                         if new_move.is_new_move() {
                             println!("Bot has played {}{}", new_move.col, new_move.row);
                         } else {
@@ -241,11 +248,11 @@ impl Game {
                     };
                     // register input and move on if move is valid
                     match self.validate_move(&new_move) {
-                        Ok(()) => {break}
+                        Ok(()) => break,
                         Err(e) => {
                             println!("{}", e);
                             println!("Error validating the move.");
-                            continue
+                            continue;
                         }
                     }
                 }
@@ -599,7 +606,60 @@ impl Game {
     }
 }
 
-fn main() {
-    let mut game = Game::new();
-    game.start();
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
+}
+
+#[post("/new")]
+async fn start_new_game() -> impl Responder {
+    // generate a uuid for a game.
+    let game_id = Uuid::new_v4();
+
+    HttpResponse::Ok().body(game_id.to_string())
+}
+
+#[post("/echo")]
+async fn echo(req_body: String) -> impl Responder {
+    HttpResponse::Ok().body(req_body)
+}
+
+async fn manual_hello() -> impl Responder {
+    HttpResponse::Ok().body("Hey there!")
+}
+// let mut game = Game::new();
+// game.start();
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    let client = TmmClient::new();
+
+    // Insert a new document into the collection.
+    let doc = GameHistory {
+        _id: String::from("036d2541-b81f-40f9-baf6-8cd8a1d589c9"),
+        player_one: String::from("c152e455-5609-4031-afeb-fa63b938de5f"),
+        player_two: String::from("e178c427-0c16-446d-98c0-51a3dff6d7e4"),
+        bot: None,
+        winner: Some(String::from("036d2541-b81f-40f9-baf6-8cd8a1d589c9")),
+        moves: String::from("a1 b1 a2 b2 a3"),
+    };
+
+    
+
+    // let result = collection.find_one(
+    //     doc! { "_id": "036d2541-b81f-40f9-baf6-8cd8a1d589c9" },
+    //     None
+    // ).await.unwrap();
+    // println!("{:#?}", result);
+
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(echo)
+            .service(start_new_game)
+            .route("/hey", web::get().to(manual_hello))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
