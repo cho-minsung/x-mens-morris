@@ -1,18 +1,23 @@
 use mongodb::{ bson::doc, options::{ ClientOptions, ServerApi, ServerApiVersion }, Client, Collection, Database };
 use mongodb::results::InsertOneResult;
 
+use uuid::Uuid;
+
 use futures::stream::StreamExt;
 
-use crate::types::GameHistory;
+use serde_json::json;
 
-pub struct TmmClient {
+use crate::types::{GameHistory, OngoingGame};
+
+pub struct TmmDbClient {
     client: Client,
     db: Database,
-    collection: Collection<GameHistory>
+    game_history: Collection<GameHistory>,
+    ongoing_games: Collection<OngoingGame>,
 }
 
-impl TmmClient {
-    pub async fn new() -> TmmClient {
+impl TmmDbClient {
+    pub async fn new() -> TmmDbClient {
         let uri = "mongodb://localhost:27017";
         let mut client_options = ClientOptions::parse_async(uri).await.unwrap();
         
@@ -35,9 +40,10 @@ impl TmmClient {
         let db = client.database("tmm");
 
         // Setting up collection
-        let collection: Collection<GameHistory> = db.collection("games");
+        let game_history: Collection<GameHistory> = db.collection("game_history");
+        let ongoing_games: Collection<OngoingGame> = db.collection("ongoing_games");
 
-        return TmmClient{ client: client, db: db, collection: collection };
+        return TmmDbClient{ client: client, db: db, game_history: game_history, ongoing_games: ongoing_games };
     }
 
     async fn get_collections(&self) {
@@ -47,9 +53,9 @@ impl TmmClient {
         }
     }
 
-    async fn insert_history(&self, doc: GameHistory) {
+    async fn insert_history(&self, doc: GameHistory){
         let res: InsertOneResult;
-        match self.collection.insert_one(doc, None).await {
+        match self.game_history.insert_one(doc, None).await {
             Ok(result) => {
                 res = result;
                 println!("Inserted a document with _id: {}", res.inserted_id);
@@ -61,9 +67,41 @@ impl TmmClient {
     }
 
     async fn get_all_history(&self) {
-        let mut cursor = self.collection.find(None, None).await.unwrap();
+        let mut cursor = self.game_history.find(None, None).await.unwrap();
         while let Some(doc) = cursor.next().await {
             println!("{:?}", doc);
         }
     }
+
+    async fn insert_onging_game(&self, doc: OngoingGame) {
+        let res: InsertOneResult;
+        match self.ongoing_games.insert_one(doc, None).await {
+            Ok(result) => {
+                res = result;
+                println!("Inserted a new ongoing game with _id: {}", res.inserted_id);
+            },
+            Err(_) => {
+                println!("Cannot insert a document.")
+            },
+        }; 
+    }
+
+    // pub async fn find_histories_by_player(&self, player_id: Uuid) -> Result<GameHistory, ()>{
+    //     let player = player_id.to_string();
+    //     let filter = doc! {
+    //         "$or": [
+    //             { "player_one": &player },
+    //             { "player_two": &player }
+    //         ]
+    //     };
+
+        // match self.game_histories.find(filter, None).await {
+        //     Ok(Some(document)) => {
+        //         let game_history: GameHistory = document;
+        //         Ok(game_history)
+        //     },
+        //     Ok(None) => Err(()),
+        //     Err(_) => Err(())
+        // }
+    // }
 }

@@ -3,13 +3,17 @@ use crate::move_def::Move;
 use crate::referee::Referee;
 
 pub struct StupidBot {
+    player_id: String,
     player: u8,
 }
 
 impl StupidBot {
     pub fn new() -> StupidBot {
         // player is default to 1
-        return StupidBot{player: 1};
+        return StupidBot{
+            player_id: String::from("036d2541-b81f-40f9-baf6-8cd8a1d589c9"),
+            player: 1,
+        };
     }
 
     pub fn set_player(&mut self, value: u8) {

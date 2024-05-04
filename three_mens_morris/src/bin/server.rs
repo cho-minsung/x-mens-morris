@@ -1,26 +1,25 @@
 use colored::*;
-use mongodb::bson::oid::ObjectId;
 use std::fmt;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::collections::HashMap;
 
 use rand::Rng;
 use uuid::Uuid;
 
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use mongodb::{
-    bson::doc,
-    options::{ClientOptions, ServerApi, ServerApiVersion},
-    Client, Collection,
-};
+use actix_web::{get, post, error, web, App, Error, HttpResponse, HttpServer, Responder};
+use futures::StreamExt;
+use serde::{Deserialize, Serialize};
 
 use three_mens_morris::move_def::Move;
 use three_mens_morris::referee::Referee;
 use three_mens_morris::state::State;
 use three_mens_morris::stupid_bot::StupidBot;
-use three_mens_morris::database::TmmClient;
-use three_mens_morris::types::GameHistory;
+use three_mens_morris::database::TmmDbClient;
+use three_mens_morris::types::{GameHistory, OngoingGame};
+
+const MAX_SIZE: usize = 262_144; // max payload size is 256k
 
 #[derive(Debug)]
 pub enum GameError {
@@ -611,12 +610,55 @@ async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
-#[post("/new")]
-async fn start_new_game() -> impl Responder {
-    // generate a uuid for a game.
-    let game_id = Uuid::new_v4();
+#[derive(Serialize, Deserialize)]
+pub struct NewGamePayload {
+    pub user_id: String,
+}
 
-    HttpResponse::Ok().body(game_id.to_string())
+#[post("/new")]
+async fn start_new_game(mut payload: web::Payload) -> Result<HttpResponse, Error> {
+    // payload is a stream of Bytes objects
+    let mut body = web::BytesMut::new();
+    while let Some(chunk) = payload.next().await {
+        let chunk = chunk?;
+        // limit max size of in-memory payload
+        if (body.len() + chunk.len()) > MAX_SIZE {
+            return Err(error::ErrorBadRequest("overflow"));
+        }
+        body.extend_from_slice(&chunk);
+    }
+    // body is loaded, now we can deserialize serde-json
+    let obj = serde_json::from_slice::<NewGamePayload>(&body)?;
+
+    // initialize new OngoingGame
+    let mut new_game: OngoingGame = OngoingGame::new();
+    // generate a uuid for a game.
+    new_game._id = Uuid::new_v4().to_string();
+    // as proof of concept, let user pass down their uuid in the payload
+    let user_id = &obj.user_id;
+    
+    // flip a coin: head -> user=player one
+    let mut rng = rand::thread_rng();
+    let random_bool: bool = rng.gen();
+    let opponent = String::from("036d2541-b81f-40f9-baf6-8cd8a1d589c9");
+    match random_bool {
+        true => {
+            new_game.player_one = user_id.to_string();
+            // for proof of concept fight a stupid bot.
+            new_game.player_two = opponent.to_string();
+        },
+        false => {
+            new_game.player_one = opponent.to_string();
+            new_game.player_two = user_id.to_string();
+        }
+    }
+
+    // Return newly generated game_id and the opponent.
+    let mut response = HashMap::new();
+    response.insert("game_id", new_game._id);
+    response.insert("player_id", user_id.to_string());
+    response.insert("opponent_id", opponent.to_string());
+    Ok(HttpResponse::Ok().json(response))
 }
 
 #[post("/echo")]
@@ -632,7 +674,7 @@ async fn manual_hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let client = TmmClient::new();
+    let client = TmmDbClient::new().await;
 
     // Insert a new document into the collection.
     let doc = GameHistory {
@@ -644,14 +686,8 @@ async fn main() -> std::io::Result<()> {
         moves: String::from("a1 b1 a2 b2 a3"),
     };
 
-    
-
-    // let result = collection.find_one(
-    //     doc! { "_id": "036d2541-b81f-40f9-baf6-8cd8a1d589c9" },
-    //     None
-    // ).await.unwrap();
-    // println!("{:#?}", result);
-
+    // let find_doc = client.find_history_by_player(Uuid::parse_str("c152e455-5609-4031-afeb-fa63b938de5f").unwrap()).await.unwrap();
+    // println!("{:?}", find_doc);
     HttpServer::new(|| {
         App::new()
             .service(hello)
