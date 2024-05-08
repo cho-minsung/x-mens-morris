@@ -1,4 +1,4 @@
-use mongodb::{ bson::doc, options::{ ClientOptions, ServerApi, ServerApiVersion }, Client, Collection, Database };
+use mongodb::{ bson::{self, doc}, options::{ ClientOptions, ServerApi, ServerApiVersion }, Client, Collection, Database };
 use mongodb::results::InsertOneResult;
 
 use uuid::Uuid;
@@ -53,7 +53,7 @@ impl TmmDbClient {
         }
     }
 
-    async fn insert_history(&self, doc: GameHistory){
+    async fn insert_history(&self, doc: &GameHistory){
         let res: InsertOneResult;
         match self.game_history.insert_one(doc, None).await {
             Ok(result) => {
@@ -73,7 +73,7 @@ impl TmmDbClient {
         }
     }
 
-    async fn insert_onging_game(&self, doc: OngoingGame) {
+    async fn insert_onging_game(&self, doc: &OngoingGame) {
         let res: InsertOneResult;
         match self.ongoing_games.insert_one(doc, None).await {
             Ok(result) => {
@@ -84,6 +84,19 @@ impl TmmDbClient {
                 println!("Cannot insert a document.")
             },
         }; 
+    }
+
+    async fn update_onging_game(&self, doc: &OngoingGame) {
+        // This function assumes all validation is done by the caller.
+        let filter = doc! { "_id": doc.get_id() };
+        // assert state is different
+        let doc_bson= bson::to_bson(doc).unwrap();
+        let update_doc = match doc_bson {
+            bson::Bson::Document(document) => document,
+            _ => return (),
+        };
+        let res = self.ongoing_games.update_one(filter, update_doc, None).await.unwrap();
+        println!("Updated documents: {}", res.modified_count);
     }
 
     // pub async fn find_histories_by_player(&self, player_id: Uuid) -> Result<GameHistory, ()>{

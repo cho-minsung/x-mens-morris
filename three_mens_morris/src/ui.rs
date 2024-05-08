@@ -1,18 +1,14 @@
 use eframe::egui;
 
-use crate::state::State;
-
-use crate::referee::Referee;
-
-use crate::move_def::Move;
+use crate::types::{OngoingGame, Move};
 
 use crate::stupid_bot::StupidBot;
 
 pub struct GameGUI {
     // column, and row
     moves: Vec<Move>,
-    state_history: Vec<State>,
-    current_state: State,
+    state_history: Vec<OngoingGame>,
+    current_state: OngoingGame,
     winner: char,
     player_mode: u8,
     bot: StupidBot,
@@ -23,7 +19,7 @@ impl Default for GameGUI {
         Self {
             moves: Vec::new(),
             state_history: Vec::new(),
-            current_state: State::new(),
+            current_state: OngoingGame::new(),
             winner: ' ',
             player_mode: 2,
             bot: StupidBot::new(),
