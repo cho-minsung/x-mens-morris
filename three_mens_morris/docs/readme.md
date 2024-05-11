@@ -1,6 +1,6 @@
 # Three mens morris
 
-## Sequence diagram
+## Sequence Diagrams
 
 ### Player vs Bot sequence
 
@@ -40,4 +40,37 @@ else Game continues
     Database->>-Server: Ok
     Server->>Player: OngoingGame
 end
+```
+
+### Player's placing a new piece
+
+```mermaid
+sequenceDiagram
+Player ->> Server: "a1"
+Server ->> Server: move = Move::from_input("a1")
+Server ->>+ Referee: is_valid_new_move(move)
+alt valid
+Referee ->> Server: True
+else invalid
+Referee ->>- Server: False
+end
+Server ->>+ Database: OngoingGame { move }
+Database ->>- Server: Ok
+Server ->> Player: OngoingGame
+```
+
+### Player's moving an existing piece
+
+```mermaid
+Player ->> Server: "a1b2"
+Server ->> Server: move = Move::from_input("a1b2")
+Server ->>+ Referee: is_valid_move(move)
+alt valid
+Referee ->> Server: True
+else invalid
+Referee ->>- Server: False
+end
+Server ->>+ Database: OngoingGame { move }
+Database ->>- Server: Ok
+Server ->> Player: OngoingGame
 ```
