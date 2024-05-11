@@ -64,6 +64,7 @@ Server ->> Player: OngoingGame
 ### Player's moving an existing piece
 
 ```mermaid
+sequenceDiagram
 Player ->> Server: "a1b2"
 Server ->> Server: move = Move::from_input("a1b2")
 Server ->>+ Referee: is_valid_move(move)
