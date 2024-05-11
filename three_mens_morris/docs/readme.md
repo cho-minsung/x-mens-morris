@@ -5,6 +5,7 @@
 ### Player vs Bot sequence
 
 ```mermaid
+sequenceDiagram
 Player->>Server: /new
 A Player goes first
     Server->>Database: insert OngoingGame
