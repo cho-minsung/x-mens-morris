@@ -7,6 +7,7 @@
 ```mermaid
 sequenceDiagram
 Player->>Server: /new
+
 A Player_first
     Server->>Database: insert OngoingGame
     Server->>Player: new OngoingGame
@@ -17,7 +18,9 @@ B Bot_first
     Server->>Database: insert OngoingGame
     Server->>Player: OngoingGame with Bot's move
 end
+
 Player->>Server: /play, Move (e.g. "a1" or "a1b2")
+
 A winner_exist
     Server->>Database: delete OngoingGame
     Server->>Database: insert GameHistory
