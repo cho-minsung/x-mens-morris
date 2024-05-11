@@ -4,27 +4,30 @@
 
 ### Player vs Bot sequence
 
+Player places a new piece
+
 ```mermaid
 sequenceDiagram
-
+Player->>Server: /new
 alt Player first
-    Player->>Server: /new
     Server->>+Database: insert OngoingGame
     Database->>-Server: Ok
     Server->>Player: new OngoingGame
 else Bot first
-    Player->>Server: /new
     Server->>+Bot: make_random_new_move
     Bot->>-Server: OngoingGame with Bot's move
     Server->>+Database: insert OngoingGame
     Database->>-Server: Ok
     Server->>Player: OngoingGame with Bot's move
 end
+```
 
+Player moves a piece from an existing location to a new location
 
+```mermaid
+sequenceDiagram
+Player->>Server: /play, Move (e.g. "a1" or "a1b2")
 alt Game over
-    Player->>Server: /play, Move (e.g. "a1" or "a1b2")
-
     par
         Server->>+Database: delete OngoingGame
         Database->>-Server: Ok
@@ -35,7 +38,6 @@ alt Game over
     
     Server->>Player: post GameHistory
 else Game continues
-    Player->>Server: /play, Move (e.g. "a1" or "a1b2")
     Server->>+Database: update OngoingGame
     Database->>-Server: Ok
     Server->>Player: OngoingGame
