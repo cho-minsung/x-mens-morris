@@ -30,14 +30,15 @@ impl StupidBot {
 
     pub fn place_random_new_piece(&self, state: &mut OngoingGame) -> Result<(), ()> {
         // This function takes ongoing game state and update a new piece there.
-
         // If it is not bot's turn return error
         if state.whose_turn != self.player_id {
+            println!("It is not bot's turn.");
             return Err(());
         }
 
         // Return error when bot ID is not in the game
         if state.player_one != self.player_id && state.player_two != self.player_id {
+            println!("Bot ID not found in game.");
             return Err(());
         }
 
@@ -48,6 +49,7 @@ impl StupidBot {
         if (state.player_one_remaining <= 0 && bot_piece == 1)
             || (state.player_two_remaining <= 0 && bot_piece == 2)
         {
+            println!("Bot has no piece left to play.");
             return Err(());
         }
 
@@ -70,7 +72,7 @@ impl StupidBot {
         let position = unoccupied_positions.choose(&mut rng).unwrap();
         let row = &position.0;
         let col = &position.1;
-        let new_move = Move::convert_to_new_move(row, col).unwrap();
+        let new_move = Move::coord_to_new_move(row, col).unwrap();
         println!("Bot played random position: {}", new_move.print());
 
         // Update state at the end

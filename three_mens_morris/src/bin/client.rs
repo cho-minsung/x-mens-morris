@@ -1,16 +1,16 @@
 use eframe::egui;
 
-use three_mens_morris::state::State;
+use three_mens_morris::types::OngoingGame;
 
 pub struct Client {
-    current_state: State,
+    current_state: OngoingGame,
     winner: char,
 }
 
 impl Default for Client {
     fn default() -> Self {
         Self {
-            current_state: State::new(),
+            current_state: OngoingGame::new(),
             winner: ' ',
         }
     }

@@ -1,5 +1,7 @@
 use mongodb::{ bson::{self, doc}, options::{ ClientOptions, ServerApi, ServerApiVersion }, Client, Collection, Database };
 use mongodb::results::InsertOneResult;
+use mongodb::error::Result as MongoResult;
+use bson::oid::ObjectId;
 
 use uuid::Uuid;
 
@@ -73,17 +75,39 @@ impl TmmDbClient {
         }
     }
 
-    async fn insert_onging_game(&self, doc: &OngoingGame) {
-        let res: InsertOneResult;
+    pub async fn get_ongoing_game_by_user_id(&self, user_id: &String) -> Result<OngoingGame, ()> {
+        let result = self.ongoing_games.find_one(
+            doc! { "$or": [{"player_one": &user_id }, {"player_two": &user_id }]},
+            None
+        ).await;
+        if result.is_ok() {
+            let ongoing_game = result.unwrap().unwrap();
+            return Ok(ongoing_game);
+        }
+        return Err(());
+    }
+
+    pub async fn get_ongoing_game(&self, _id: &String) -> Result<OngoingGame, ()> {
+        let result = self.ongoing_games.find_one(
+            doc! { "_id": _id},
+            None
+        ).await;
+        if result.is_ok() {
+            let ongoing_game = result.unwrap().unwrap();
+            return Ok(ongoing_game);
+        }
+        return Err(());
+    }
+
+    pub async fn insert_onging_game(&self, doc: &OngoingGame) -> MongoResult<()> {
         match self.ongoing_games.insert_one(doc, None).await {
             Ok(result) => {
-                res = result;
-                println!("Inserted a new ongoing game with _id: {}", res.inserted_id);
+                Ok(())
             },
-            Err(_) => {
-                println!("Cannot insert a document.")
-            },
-        }; 
+            Err(e) => {
+                Err(e)
+            }
+        }
     }
 
     async fn update_onging_game(&self, doc: &OngoingGame) {

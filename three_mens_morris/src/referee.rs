@@ -2,6 +2,12 @@ use crate::types::OngoingGame;
 
 pub struct Referee {
     // Referee is always fair and right!
+    // Goals:
+    // - t/f for valid move, given the state (is_valid_move)
+    // - t/f for valid new move, given the state (is_valid_new_move)
+    // Non-goals:
+    // - check for checkmate position
+    // referee always takes coordinates
 }
 
 impl Referee {
@@ -62,6 +68,12 @@ impl Referee {
             return Err(());
         }
         Ok(critical_moves)
+    }
+
+    pub fn is_valid_new_move(state: &OngoingGame, row: usize, col: usize) -> bool {
+        // check if it is new move
+        // valid if board is zero.
+        return state.board[row][col] == 0;
     }
 
     pub fn is_valid_move(old_row: usize, old_col: usize, new_row: usize, new_col: usize) -> bool {
