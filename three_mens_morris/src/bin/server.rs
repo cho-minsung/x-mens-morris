@@ -61,6 +61,7 @@ async fn play(mut payload: web::Payload) -> Result<HttpResponse, Error> {
 
     let user_id = &obj.user_id;
     println!("move_code: {}", &obj.move_code);
+    // TODO: check if move is valid
     let new_move = Move::string_to_move(&obj.move_code).unwrap();
 
     println!("got user ID {}", user_id);
@@ -68,12 +69,13 @@ async fn play(mut payload: web::Payload) -> Result<HttpResponse, Error> {
     
     // Retrieve ongoing game
     let client = TmmDbClient::new().await;
-
     let ongoing_game = client.get_ongoing_game_by_user_id(user_id).await.unwrap();
 
-    // Check if input move is valid
-    // Referee::is_valid_new_move(new_move);
-    // is_valid_move
+    // Check whether piece is new or not
+    if new_move.new_col.is_none() {
+        // move is new
+        
+    }
 
     // Return newly generated game_id and the opponent.
     let mut response = HashMap::new();
@@ -97,10 +99,6 @@ async fn get_game(path: web::Path<String,>) -> Result<HttpResponse, Error> {
     let client = TmmDbClient::new().await;
     let ongoing_game = client.get_ongoing_game(&game_id).await.unwrap();
 
-    // Check if input move is valid
-    // Referee::is_valid_new_move(new_move);
-    // is_valid_move
-
     // // Return newly generated game_id and the opponent.
     let mut response = HashMap::new();
     response.insert("game_id", ongoing_game._id.to_string());
@@ -112,6 +110,25 @@ async fn get_game(path: web::Path<String,>) -> Result<HttpResponse, Error> {
     response.insert("player_two_remaining", ongoing_game.player_two_remaining.to_string());
     response.insert("board", ongoing_game.flatten_board());
     // response.insert("moves", ongoing_game.moves.iter().map(|i| i.print()).collect::<Vec<String>>());
+    Ok(HttpResponse::Ok().json(response))
+}
+
+#[get("/games/{player_id}")]
+async fn get_games_by_player_id(path: web::Path<String,>) -> Result<HttpResponse, Error> {
+    // get all game ID this player is currently playing
+    let player_id = path.into_inner();
+    println!("player ID: {}", player_id);
+    
+    // Retrieve ongoing game
+    let client = TmmDbClient::new().await;
+    let ongoing_games = client.get_all_ongoing_games_by_user_id(&player_id).await.unwrap();
+
+    let mut response = HashMap::new();
+    for (i, game) in ongoing_games.iter().enumerate() {
+        let key = format!("game_{}", i);
+        response.insert(key, game._id.to_string());
+    }
+    
     Ok(HttpResponse::Ok().json(response))
 }
 
@@ -222,6 +239,7 @@ async fn main() -> std::io::Result<()> {
             .service(echo)
             .service(get_game)
             .service(start_new_game)
+            .service(get_games_by_player_id)
             .route("/hey", web::get().to(manual_hello))
     })
     .bind(("127.0.0.1", 8080))?

@@ -87,6 +87,26 @@ impl TmmDbClient {
         return Err(());
     }
 
+    pub async fn get_all_ongoing_games_by_user_id(&self, user_id: &String) -> Result<Vec<OngoingGame>, ()> {
+        let mut games: Vec<OngoingGame> = Vec::new();
+        let mut cursor = self.ongoing_games.find(
+            doc! { "$or": [{"player_one": &user_id }, {"player_two": &user_id }]},
+            None
+        ).await.unwrap();
+        while let Some(result) = cursor.next().await {
+            match result {
+                Ok(doc) => {
+                    games.push(doc);
+                },
+                Err(e) => {
+                    println!("Error: {}", e);
+                    // Handle error
+                }
+            }
+        }
+        return Ok(games);
+    }
+
     pub async fn get_ongoing_game(&self, _id: &String) -> Result<OngoingGame, ()> {
         let result = self.ongoing_games.find_one(
             doc! { "_id": _id},
