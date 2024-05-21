@@ -1,5 +1,7 @@
 use eframe::egui;
 
+use egui::{Area, Id};
+
 use three_mens_morris::types::OngoingGame;
 
 pub struct Client {
@@ -22,6 +24,7 @@ impl eframe::App for Client {
         .frame(egui::Frame::default().inner_margin(20.0).outer_margin(20.0))
         .show(ctx, |ui| {
             ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                ui.heading("The goal of Three mens morris is to connect any line with your three pieces.");
                 ui.heading("Rules:");
                 ui.monospace("1. Each player gets 3 pieces to play");
                 ui.monospace("2. Each player takes turn playing all their pieces first.");
@@ -34,58 +37,69 @@ impl eframe::App for Client {
         egui::CentralPanel::default()
             .frame(egui::Frame::default().inner_margin(20.0).outer_margin(20.0))
             .show(ctx, |ui| {
-                ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                    let mut positions = Vec::new();
-                    for row in 0..3 {
-                        ui.with_layout(egui::Layout::left_to_right(egui::Align::LEFT), |ui| {
-                            for col in 0..3 {
-                                let response = ui.add(
-                                    egui::Button::new(format!(
-                                        "{:?}",
-                                        self.current_state.board[row][col]
-                                    ))
-                                    .min_size(egui::Vec2::new(50.0, 50.0)),
+                // create a new area
+                egui::Area::new(egui::Id::new("button_area"))
+                    .show(ctx, |ui| {
+                        ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                            let mut positions = Vec::new();
+                            for row in 0..3 {
+                                ui.with_layout(
+                                    egui::Layout::left_to_right(egui::Align::LEFT),
+                                    |ui| {
+                                        for col in 0..3 {
+                                            let response = ui.add(
+                                                egui::Button::new(format!(
+                                                    "{:?}",
+                                                    self.current_state.board[row][col]
+                                                ))
+                                                .min_size(egui::Vec2::new(50.0, 50.0)),
+                                            );
+                                            if col != 2 {
+                                                ui.add_space(50.0);
+                                            }
+                                            if response.clicked() {
+                                                self.current_state.board[row][col] += 1;
+                                            }
+                                            positions.push(response.rect.center());
+                                        }
+                                    },
                                 );
-                                if col != 2 {
-                                    ui.add_space(50.0);
-                                }
-                                if response.clicked() {
-                                    self.current_state.board[row][col] += 1;
-                                }
-                                positions.push(response.rect.center());
+                                ui.add_space(50.0);
                             }
                         });
-                        ui.add_space(50.0);
-                    }
-                    ui.painter().add(egui::Shape::line_segment(
-                        [positions[0], positions[2]],
-                        egui::Stroke::new(1.0, egui::Color32::WHITE),
-                    ));
-                    ui.painter().add(egui::Shape::line_segment(
-                        [positions[0], positions[6]],
-                        egui::Stroke::new(1.0, egui::Color32::WHITE),
-                    ));
-                    ui.painter().add(egui::Shape::line_segment(
-                        [positions[0], positions[8]],
-                        egui::Stroke::new(1.0, egui::Color32::WHITE),
-                    ));
-                    ui.painter().add(egui::Shape::line_segment(
-                        [positions[2], positions[6]],
-                        egui::Stroke::new(1.0, egui::Color32::WHITE),
-                    ));
-                    ui.painter().add(egui::Shape::line_segment(
-                        [positions[2], positions[8]],
-                        egui::Stroke::new(1.0, egui::Color32::WHITE),
-                    ));
-                    ui.painter().add(egui::Shape::line_segment(
-                        [positions[6], positions[8]],
-                        egui::Stroke::new(1.0, egui::Color32::WHITE),
-                    ));
-                });
+                        
+                        egui::Area::new(egui::Id::new("button_area"))
+                    .show(ctx, |ui| {
+                        ui.painter().add(egui::Shape::line_segment(
+                            [positions[0], positions[2]],
+                            egui::Stroke::new(1.0, egui::Color32::WHITE),
+                        ));
+                        ui.painter().add(egui::Shape::line_segment(
+                            [positions[0], positions[6]],
+                            egui::Stroke::new(1.0, egui::Color32::WHITE),
+                        ));
+                        ui.painter().add(egui::Shape::line_segment(
+                            [positions[0], positions[8]],
+                            egui::Stroke::new(1.0, egui::Color32::WHITE),
+                        ));
+                        ui.painter().add(egui::Shape::line_segment(
+                            [positions[2], positions[6]],
+                            egui::Stroke::new(1.0, egui::Color32::WHITE),
+                        ));
+                        ui.painter().add(egui::Shape::line_segment(
+                            [positions[2], positions[8]],
+                            egui::Stroke::new(1.0, egui::Color32::WHITE),
+                        ));
+                        ui.painter().add(egui::Shape::line_segment(
+                            [positions[6], positions[8]],
+                            egui::Stroke::new(1.0, egui::Color32::WHITE),
+                        ));
+                    });
+                        
+                    });
             });
     }
 }
-
 
 fn main() -> Result<(), eframe::Error> {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
