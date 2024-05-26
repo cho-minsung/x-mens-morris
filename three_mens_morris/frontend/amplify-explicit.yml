@@ -1,0 +1,22 @@
+version: 1.0
+applications:
+    -
+      buildpath: frontend
+      frontend:
+        phases:
+          preBuild:
+            commands:
+              - cd frontend
+              - npm install --quiet --global expo-cli
+              - npm ci
+          build:
+            commands:
+              - expo build:web
+        artifacts:
+          baseDirectory: frontend/web-build
+          files:
+            - '**/*'
+        cache:
+          paths:
+            - frontend/node_modules/**/*
+            - $(npm root --global)/**/*
