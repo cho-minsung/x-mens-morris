@@ -121,10 +121,10 @@ export default function PlayPage() {
   return (
     <View style={styles.container}>
       {modalView()}
-      {/* <Text style={[styles.title, { color: turnColor }]}>
+      <Text style={[styles.title, { color: turnColor }]}>
         {turn}'s {turnText}
-      </Text> */}
-      <Text style={[styles.title]}>{pressedIndex}</Text>
+      </Text>
+      {/* <Text style={[styles.title]}>{pressedIndex}</Text> */}
       <Board board={board} handlePress={handlePress} pressedIndex={pressedIndex} />
       <TouchableOpacity onPress={resetGame} style={styles.button}>
         <Text style={styles.buttonText}>New Game</Text>
