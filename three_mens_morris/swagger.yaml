@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Three Men's Morris Game API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /games:
+    post:
+      summary: Create a new game
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Game"
+      responses:
+        "201":
+          description: Game created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+  /games/{id}:
+    get:
+      summary: Get a game by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        player1:
+          type: string
+        player2:
+          type: string
+        current_state:
+          type: string
+        winner:
+          type: string

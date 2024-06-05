@@ -1,16 +1,11 @@
-import { Text, View } from "react-native";
-import Board from '../components/Board';
+import { View, Text } from "react-native";
 
-export default function Index() {
+import HomePage from "./homepage";
+
+const App = () => {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Board />
-    </View>
+      <HomePage />
   );
-}
+};
+
+export default App;

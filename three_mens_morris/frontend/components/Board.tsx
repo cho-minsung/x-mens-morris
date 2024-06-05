@@ -1,317 +1,123 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Alert,
-  View,
-  Modal,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  TextInput,
-  Button,
-  PanResponder,
-  Animated,
-} from "react-native";
-import { DataTable } from "react-native-paper";
 
-const Board = () => {
-  const [board, setBoard] = useState(Array.from({ length: 9 }, () => 0));
-  const [turn, setTurn] = useState("Player One not set");
-  const [gameId, setGameId] = useState("Game not loaded");
-  const [playerOneId, setPlayerOneId] = useState("Player One not set");
-  const [playerTwoId, setPlayerTwoId] = useState("Player Two not set");
-  const [playerOneRemaining, setPlayerOneRemaining] = useState(3);
-  const [playerTwoRemaining, setPlayerTwoRemaining] = useState(3);
-  const [userId, setUserId] = useState("");
-  const [search, setSearch] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalText, setModalText] = useState("");
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-  const pan = useRef(new Animated.ValueXY()).current;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onPanResponderMove: Animated.event(
-        [
-          null,
-          {
-            dx: pan.x, // x displacement
-            dy: pan.y, // y displacement
-          },
-        ],
-        { useNativeDriver: false }
-      ),
-      onPanResponderRelease: () => {
-        Animated.spring(pan, {
-          toValue: { x: 0, y: 0 },
-          useNativeDriver: false,
-        }).start();
-      },
-    })
-  ).current;
-
-  const handlePress = (index: number) => {
-    if (turn === "") {
-      setModalText("Enter user ID first");
-      setModalVisible(true);
-    } else if (board[index] === 0) {
-      const newBoard = [...board];
-      newBoard[index] = turn === playerOneId ? 1 : 2;
-      setBoard(newBoard);
-      // TODO: send new move to server
-      // then the server return the updated state
-      // for now, manually change to the other player
-      setTurn(turn === playerOneId ? playerTwoId : playerOneId);
-    }
-  };
-
-  const handleSearch = () => {
-    // TODO: implement search and load game state
-  };
-
-  const handleCreateGame = () => {
-    // Add your create game logic here
-    // for now, always use player one as user ID
-    // make sure user ID is not empty
-    if (!userId) {
-      setModalText("Enter user ID first");
-      setModalVisible(true);
-      return
-    }
-
-    setPlayerOneId(userId);
-    setPlayerTwoId("Bot");
-    setPlayerOneRemaining(3);
-    setPlayerTwoRemaining(3);
-    // TODO: for now, user always goes first.
-    setTurn(userId);
-  };
-
-  const handleResetGameState = () => {
-    // reset all board to 0
-    setBoard(Array.from({ length: 9 }, () => 0));
-    // reset player 1 and 2 id and game id and turn to not set
-    setPlayerOneId("");
-    setPlayerTwoId("");
-    setGameId("");
-    setTurn("");
-  };
-
+const Lines = () => {
   return (
-    <View style={styles.container}>
-      <Modal
-      animationType="fade"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => {
-        setModalVisible(!modalVisible);
-      }}
-    >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>{modalText}</Text>
+    <>
+      <View style={styles.leftLine} />
+      <View style={styles.rightLine} />
+      <View style={styles.topLine} />
+      <View style={styles.bottomLine} />
+      <View style={styles.middleLine} />
+      <View style={styles.vertLine} />
+      <View style={styles.negLine} />
+      <View style={styles.posLine} />
+    </>
+  );
+};
 
-          <TouchableOpacity
-            style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
-            onPress={() => {
-              setModalVisible(!modalVisible);
-            }}
-          >
-            <Text style={styles.textStyle}>OK</Text>
-          </TouchableOpacity>
+export const emptyBoard = () => {
+  return (
+    <View style={styles.board}>
+      {Lines()}
+      {emptyPieces()}
+    </View>
+  );
+};
+
+const emptyPieces = () => {
+  return (
+    <>
+      {[0, 1, 2].map((row) => (
+        <View key={row} style={styles.row}>
+          {[0, 1, 2].map((col) => {
+            const index = row * 3 + col;
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[styles.cell]}
+                activeOpacity={1}
+              >
+                {/* <Text style={styles.cellText}>{board[index]}</Text> */}
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      </View>
-    </Modal>
-      <View style={styles.verticalContainer}>
-        <TextInput
-          style={styles.input}
-          onChangeText={setSearch}
-          value={search}
-          placeholder="Search Game ID"
-          onSubmitEditing={handleSearch}
-        />
-        <DataTable>
-          <DataTable.Row>
-            <DataTable.Cell>Game ID</DataTable.Cell>
-            <DataTable.Cell numeric>{gameId}</DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell><Text style={{color: "blue"} }>Player One ID</Text></DataTable.Cell>
-            <DataTable.Cell numeric><Text style={{color: "blue"} }>{playerOneId}</Text></DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell>Pieces left</DataTable.Cell>
-            <DataTable.Cell numeric>{playerOneRemaining}</DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell><Text style={{color: "red"} }>Player Two ID</Text></DataTable.Cell>
-            <DataTable.Cell numeric><Text style={{color: "red"} }>{playerTwoId}</Text></DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell>Pieces left</DataTable.Cell>
-            <DataTable.Cell numeric>{playerTwoRemaining}</DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell>Current Turn</DataTable.Cell>
-            <DataTable.Cell numeric>{turn}</DataTable.Cell>
-          </DataTable.Row>
-        </DataTable>
-        <View style={styles.GameControlContainer}>
-          <TextInput
-            style={styles.input}
-            onChangeText={setUserId}
-            value={userId}
-            placeholder="Username"
-          />
-          <TouchableOpacity style={styles.button} onPress={handleCreateGame}>
-            <Text>Create New Game</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.resetButton}
-            onPress={handleResetGameState}
-          >
-            <Text>Reset Game State</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.board}>
-        <View style={styles.leftLine} />
-        <View style={styles.rightLine} />
-        <View style={styles.topLine} />
-        <View style={styles.bottomLine} />
-        <View style={styles.middleLine} />
-        <View style={styles.negLine} />
-        <View style={styles.posLine} />
-        <View style={styles.vertLine} />
+      ))}
+    </>
+  );
+};
+
+interface BoardProps {
+  board: number[];
+  pressedIndex: number;
+  handlePress: (index: number) => void;
+}
+
+export const Board: React.FC<BoardProps> = ({ board, handlePress, pressedIndex }) => {
+  const dynamicPieces = () => {
+    return (
+      <>
         {[0, 1, 2].map((row) => (
           <View key={row} style={styles.row}>
             {[0, 1, 2].map((col) => {
               const index = row * 3 + col;
               return (
-                <Animated.View
-                  {...panResponder.panHandlers}
-                  style={[pan.getLayout(), styles.cell]}
+                <TouchableOpacity
                   key={index}
-                >
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.cell,
-                      {
-                        backgroundColor:
-                          board[index] === 0
-                            ? "empty"
-                            : board[index] === 1
-                            ? "blue"
+                  style={[
+                    styles.cell,
+                    {
+                      backgroundColor:
+                        board[index] === 0
+                          ? "white"
+                          : board[index] === 1
+                          ? "blue"
                             : "red",
-                      },
-                    ]}
-                    onPress={() => handlePress(index)}
-                  >
-                    {/* <Text style={styles.cellText}>{board[index]}</Text> */}
-                  </TouchableOpacity>
-                </Animated.View>
+                      borderColor: index === pressedIndex ? 'yellow' : '#000',
+                    },
+                  ]}
+                  activeOpacity={1}
+                  onPress={() => handlePress(index)}
+                >
+                  <Text>{board[index]}</Text>
+                </TouchableOpacity>
               );
             })}
           </View>
         ))}
-      </View>
+      </>
+    );
+  };
+
+  return (
+    <View style={styles.board}>
+      {Lines()}
+      {dynamicPieces()}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center"
-  },
-  openButton: {
-    backgroundColor: "#F194FF",
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  verticalContainer: {
-    width: 400,
-    marginRight: 40,
-  },
-  GameControlContainer: {
-    paddingTop: 40,
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 40,
-    paddingLeft: 10,
-  },
-  button: {
-    margin: 10,
-    borderWidth: 1,
-    borderColor: "#000",
-    backgroundColor: "#4CAF50",
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  resetButton: {
-    margin: 10,
-    borderWidth: 1,
-    borderColor: "#000",
-    backgroundColor: "#FF0000",
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   board: {
     // width: 100,
     // height: 250,
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
-    zIndex: 1,
+    // zIndex: 1,
   },
   row: {
     flexDirection: "row",
+    //   opacity:0,
   },
   cell: {
-    width: 100,
-    height: 100,
+    width: 50,
+    height: 50,
     margin: 25,
-    borderWidth: 1,
-    borderColor: "#000",
+    borderWidth: 3,
+    // borderColor: "#000",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 150,
@@ -323,83 +129,81 @@ const styles = StyleSheet.create({
   leftLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
-    top: "10%", // adjust this to move the line up and down
-    left: "16%", // this centers the line horizontally
+    top: "17%", // adjust this to move the line up and down
+    left: "12%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     // transform:  [{ rotate: `90deg` }],
-    height: 300,
+    height: 200,
   },
   rightLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
-    top: "10%", // adjust this to move the line up and down
-    left: "83%", // this centers the line horizontally
+    top: "17%", // adjust this to move the line up and down
+    left: "63%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     // transform:  [{ rotate: `90deg` }],
-    height: 300,
+    height: 200,
   },
   topLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
     top: "-16%", // adjust this to move the line up and down
-    left: "50%", // this centers the line horizontally
+    left: "37%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     transform: [{ rotate: `90deg` }],
-    height: 300,
+    height: 200,
   },
   bottomLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
     top: "50%", // adjust this to move the line up and down
-    left: "50%", // this centers the line horizontally
+    left: "37%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     transform: [{ rotate: `90deg` }],
-    height: 300,
+    height: 200,
   },
   middleLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
     top: "17%", // adjust this to move the line up and down
-    left: "50%", // this centers the line horizontally
+    left: "37%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     transform: [{ rotate: `90deg` }],
-    height: 300,
+    height: 200,
   },
   negLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
-    top: "6%", // adjust this to move the line up and down
-    left: "50%", // this centers the line horizontally
+    top: "8%", // adjust this to move the line up and down
+    left: "38%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     transform: [{ rotate: `45deg` }],
-    height: 400,
+    height: 250,
   },
   posLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
-    top: "6%", // adjust this to move the line up and down
-    left: "50%", // this centers the line horizontally
+    top: "8%", // adjust this to move the line up and down
+    left: "38%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     transform: [{ rotate: `-45deg` }],
-    height: 400,
+    height: 250,
   },
   vertLine: {
     zIndex: 0,
     position: "absolute", // this positions the line on top of the cells
-    top: "6%", // adjust this to move the line up and down
-    left: "49%", // this centers the line horizontally
+    top: "16%", // adjust this to move the line up and down
+    left: "37%", // this centers the line horizontally
     width: 5, // or any value you want for the line thickness
     backgroundColor: "black", // or any color you want for the line
     // transform:  [{ rotate: `90deg` }],
-    height: 300,
+    height: 200,
   },
 });
-
-export default Board;
