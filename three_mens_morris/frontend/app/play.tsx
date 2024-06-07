@@ -4,6 +4,7 @@ import { colorPalette } from "./colors";
 // import { Link } from "expo-router";
 
 import { Board } from "../components/Board";
+import { Bot } from "../components/Bot";
 import { isValidMove, indexToRowCol } from "../components/Rules";
 
 export default function PlayPage() {
@@ -41,8 +42,8 @@ export default function PlayPage() {
 
             <TouchableOpacity
               style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
-                        onPress={() => {
-                            resetGame();
+              onPress={() => {
+                resetGame();
                 setModalVisible(!modalVisible);
               }}
             >
@@ -58,33 +59,37 @@ export default function PlayPage() {
     return turn === playerOneId ? 1 : turn === playerTwoId ? 2 : -1;
   };
 
-    const checkWin = (newBoard: number[], player: number) => {
+  const checkWin = (newBoard: number[], player: number) => {
     for (let i = 0; i < 3; i++) {
       if (
         (newBoard[i * 3] === player &&
-            newBoard[i * 3] === newBoard[i * 3 + 1] &&
-            newBoard[i * 3] === newBoard[i * 3 + 2]) || (newBoard[i] === player &&
-                newBoard[i] === newBoard[i + 3] &&
-                newBoard[i] === newBoard[i + 6])
+          newBoard[i * 3] === newBoard[i * 3 + 1] &&
+          newBoard[i * 3] === newBoard[i * 3 + 2]) ||
+        (newBoard[i] === player &&
+          newBoard[i] === newBoard[i + 3] &&
+          newBoard[i] === newBoard[i + 6])
       ) {
-          setWinner(player);
-          setModalText("Game over. Somebody won!");
-      setModalVisible(true);
+        setWinner(player);
+        setModalText("Game over. Somebody won!");
+        setModalVisible(true);
       }
     }
 
     // Check diagonals
     if (
-      (newBoard[0] === player && newBoard[0] === newBoard[4] && newBoard[0] === newBoard[8]) ||
-      (newBoard[2] === player && newBoard[2] === newBoard[4] && newBoard[2] === newBoard[6])
+      (newBoard[0] === player &&
+        newBoard[0] === newBoard[4] &&
+        newBoard[0] === newBoard[8]) ||
+      (newBoard[2] === player &&
+        newBoard[2] === newBoard[4] &&
+        newBoard[2] === newBoard[6])
     ) {
-        setWinner(player);
-        setModalText("Game over. Somebody won!");
+      setWinner(player);
+      setModalText("Game over. Somebody won!");
       setModalVisible(true);
     }
-        // set the turn only if there is no winner
+    // set the turn only if there is no winner
     setTurn(turn === playerOneId ? playerTwoId : playerOneId);
-
   };
 
   const updateBoard = (newIndex: number, oldIndex?: number) => {
@@ -144,21 +149,21 @@ export default function PlayPage() {
     }
 
     setPressedIndex(-1);
-      setBoard(newBoard);
-      checkWin(newBoard, num);
+    setBoard(newBoard);
+    checkWin(newBoard, num);
   };
 
   const handlePress = (index: number) => {
     // this function has two goals:
     // 1. set pressed index on its own piece
-      // 2. call updateBoard
-      
+    // 2. call updateBoard
+
     let num = getPieceNum();
 
     // new piece
     if (board[index] === 0 && pressedIndex === -1) {
       // reject if turn player does not have any remaining pieces but did not indicate to move existing pieces
-        updateBoard(index);
+      updateBoard(index);
       return;
     }
 
@@ -190,7 +195,7 @@ export default function PlayPage() {
       pressedIndex != -1 &&
       board[pressedIndex] === num
     ) {
-        updateBoard(index, pressedIndex);
+      updateBoard(index, pressedIndex);
       return;
     }
   };
