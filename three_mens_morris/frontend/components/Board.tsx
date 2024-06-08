@@ -71,10 +71,10 @@ export const Board: React.FC<BoardProps> = ({ board, handlePress, pressedIndex }
                     {
                       backgroundColor:
                         board[index] === 0
-                          ? "white"
+                          ? "brown"
                           : board[index] === 1
-                          ? "blue"
-                            : "red",
+                          ? "black"
+                            : "white",
                       borderColor: index === pressedIndex ? 'yellow' : '#000',
                     },
                   ]}

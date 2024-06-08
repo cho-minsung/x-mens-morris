@@ -1,7 +1,17 @@
 import { isValidMove } from "./Rules";
 
-export const Bot = () => {
-  function getRandIndex(board: number[]): number {
+export default class Bot {
+    piece: number;
+    
+  constructor(piece: number) {
+    this.piece = piece;
+  }
+    
+    changePiece(piece: number) {
+        this.piece = piece;
+    }
+    
+  getRandIndex(board: number[]): number {
     let unoccupied_positions = [];
 
     // Find positions where the value is zero
@@ -17,7 +27,7 @@ export const Bot = () => {
     ];
   }
 
-  function getRandMove(board: number[], piece: number): [number, number] {
+  getRandMove(board: number[]): [number, number] {
     // return new index and old index that are valid and random.
     let unoccupied_positions: number[] = [];
     let occupied_positions: number[] = [];
@@ -28,7 +38,7 @@ export const Bot = () => {
       if (board[i] === 0) {
         unoccupied_positions.push(i);
       }
-      if (board[i] === piece) {
+      if (board[i] === this.piece) {
         occupied_positions.push(i);
       }
     }
@@ -52,10 +62,7 @@ export const Bot = () => {
     return [randomNewIndex, randomOldIndex];
   }
 
-  function checkWinningIndex(
-    board: number[],
-    piece: number
-  ): [boolean, number?] {
+  checkWinningIndex(board: number[], piece?: number): [boolean, number?] {
     // All possible winning combinations
     const lines = [
       [0, 1, 2],
@@ -72,13 +79,25 @@ export const Bot = () => {
 
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
-      if (board[a] === piece && board[b] === piece && board[c] === 0) {
+      if (
+        board[a] === this.piece &&
+        board[b] === this.piece &&
+        board[c] === 0
+      ) {
         winningIndex.push(c);
       }
-      if (board[a] === piece && board[c] === piece && board[b] === 0) {
+      if (
+        board[a] === this.piece &&
+        board[c] === this.piece &&
+        board[b] === 0
+      ) {
         winningIndex.push(b);
       }
-      if (board[b] === piece && board[c] === piece && board[a] === 0) {
+      if (
+        board[b] === this.piece &&
+        board[c] === this.piece &&
+        board[a] === 0
+      ) {
         winningIndex.push(a);
       }
     }
@@ -94,22 +113,15 @@ export const Bot = () => {
     }
   }
 
-  function checkOpsWinningIndex(
-    board: number[],
-    piece: number
-  ): [boolean, number?] {
-    let opponentPiece = piece === 1 ? 2 : 1;
-    return checkWinningIndex(board, opponentPiece);
+  checkOpsWinningIndex(board: number[]): [boolean, number?] {
+    let opponentPiece = this.piece === 1 ? 2 : 1;
+    return this.checkWinningIndex(board, opponentPiece);
   }
 
-  function checkMovePossible(
-    board: number[],
-    piece: number,
-    targetIndex: number
-  ): [boolean, number?] {
+  checkMovePossible(board: number[], targetIndex: number): [boolean, number?] {
     let oldIndices = [];
     for (let i = 0; i < board.length; i++) {
-      if (board[i] === piece && isValidMove(i, targetIndex)) {
+      if (board[i] === this.piece && isValidMove(i, targetIndex)) {
         // TODO: eliminate move that will expose to lost game.
         oldIndices.push(i);
       }
@@ -123,47 +135,39 @@ export const Bot = () => {
     return [true, oldIndex];
   }
 
-  function play(
-    board: number[],
-    piece: number,
-    move: boolean
-  ): [number, number?] {
+  play(board: number[], move: boolean): [number, number?] {
     // new index
     // optional old index
-    let [winnable, index] = checkWinningIndex(board, piece);
+    let [winnable, index] = this.checkWinningIndex(board, this.piece);
 
     // bot is moving a piece
     if (move) {
       if (winnable) {
         // check if any move is possible to win
-        let [winMovePossible, oldIndex] = checkMovePossible(
+        let [winMovePossible, oldIndex] = this.checkMovePossible(
           board,
-          piece,
           index as number
         );
         if (winMovePossible) {
           return [index as number, oldIndex as number];
         } else {
-          let [opponentWinnable, opponentIndex] = checkOpsWinningIndex(
-            board,
-            piece
-          );
+          let [opponentWinnable, opponentIndex] =
+            this.checkOpsWinningIndex(board);
           if (opponentWinnable) {
-            let [blockMovePossible, oldIndex] = checkMovePossible(
+            let [blockMovePossible, oldIndex] = this.checkMovePossible(
               board,
-              piece,
               opponentIndex as number
             );
             if (blockMovePossible) {
               return [opponentIndex as number, oldIndex as number];
             } else {
               // GG
-              return getRandMove(board, piece);
+              return this.getRandMove(board);
             }
           }
         }
       } else {
-        return getRandMove(board, piece);
+        return this.getRandMove(board);
       }
     } else {
       // bot is placing a new piece
@@ -171,20 +175,18 @@ export const Bot = () => {
         return [index as number];
       } else {
         // block opposite winning index
-        let [opponentWinnable, opponentIndex] = checkOpsWinningIndex(
-          board,
-          piece
-        );
+        let [opponentWinnable, opponentIndex] =
+          this.checkOpsWinningIndex(board);
         if (opponentWinnable) {
           // blockable
           return [opponentIndex as number];
         } else {
           // GG
-          return [getRandIndex(board)];
+          return [this.getRandIndex(board)];
         }
       }
     }
     // Add a default return statement at the end
     return [-1];
   }
-};
+}

@@ -4,27 +4,37 @@ import { colorPalette } from "./colors";
 // import { Link } from "expo-router";
 
 import { Board } from "../components/Board";
-import { Bot } from "../components/Bot";
+import Bot from "../components/Bot";
 import { isValidMove, indexToRowCol } from "../components/Rules";
 
 export default function PlayPage() {
+  const bot = useRef(new Bot(1)).current;
+
   const [board, setBoard] = useState(Array.from({ length: 9 }, () => 0));
-  const [turn, setTurn] = useState("Player");
+  const [turn, setTurn] = useState(1);
   const [winner, setWinner] = useState(0);
-  const [playerOneId, setPlayerOneId] = useState("Player");
-  const [playerTwoId, setPlayerTwoId] = useState("Bot");
-  const [playerOneRemaining, setPlayerOneRemaining] = useState(3);
-  const [playerTwoRemaining, setPlayerTwoRemaining] = useState(3);
-  const playersRemaining = [playerOneRemaining, playerTwoRemaining];
+  const [debug, setDebug] = useState("");
+
+  const [playerPiece, setPlayerPiece] = useState(1);
+  const [botPiece, setBotPiece] = useState(2);
+  const [playerRemaining, setPlayerRemaining] = useState(3);
+  const [botRemaining, setBotRemaining] = useState(3);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalText, setModalText] = useState("");
   const [pressedIndex, setPressedIndex] = useState(-1);
-  const turnColor = winner ? "black" : turn === playerOneId ? "blue" : "red";
-  const turnText =
-    (turn === playerOneId && playerOneRemaining > 0) ||
-    (turn === playerTwoId && playerTwoRemaining > 0)
-      ? "Turn"
-      : "Move";
+  const turnColor = turn === 1 ? "black" : "white";
+  const [turnText, setTurnText] = useState(
+    turn === playerPiece ? "Player" : "Bot"
+  );
+
+  useEffect(() => {
+    setTurnText(turn === playerPiece ? "Player" : "Bot");
+  }, [turn]);
+  //   const turnText =
+  //     (turn === playerPiece && playerRemaining > 0) ||
+  //     (turn === botPiece && botRemaining > 0)
+  //       ? "Turn"
+  //       : "Move";
 
   const modalView = () => {
     return (
@@ -53,10 +63,6 @@ export default function PlayPage() {
         </View>
       </Modal>
     );
-  };
-
-  const getPieceNum = () => {
-    return turn === playerOneId ? 1 : turn === playerTwoId ? 2 : -1;
   };
 
   const checkWin = (newBoard: number[], player: number) => {
@@ -88,24 +94,20 @@ export default function PlayPage() {
       setModalText("Game over. Somebody won!");
       setModalVisible(true);
     }
-    // set the turn only if there is no winner
-    setTurn(turn === playerOneId ? playerTwoId : playerOneId);
   };
 
   const updateBoard = (newIndex: number, oldIndex?: number) => {
     // update that current turn value to the board.
     // if old index is given then take the value of old index and assign it to new index.
-    let num = getPieceNum();
-
     const newBoard = [...board];
 
     // new piece
     if (oldIndex === undefined) {
       // reject if turn player does not have remaining pieces to play.
-      if (turn === playerOneId && playerOneRemaining <= 0) {
+      if (turn === playerPiece && playerRemaining <= 0) {
         return;
       }
-      if (turn === playerTwoId && playerTwoRemaining <= 0) {
+      if (turn === botPiece && botRemaining <= 0) {
         return;
       }
 
@@ -114,25 +116,28 @@ export default function PlayPage() {
         return;
       }
 
-      let newPlayerRemaining = playersRemaining[num - 1] - 1;
-
-      if (num === 1) {
-        setPlayerOneRemaining(newPlayerRemaining);
-      } else if (num === 2) {
-        setPlayerTwoRemaining(newPlayerRemaining);
+      if (turn === playerPiece) {
+        setPlayerRemaining(playerRemaining - 1);
+        newBoard[newIndex] = playerPiece;
+      } else {
+        setBotRemaining(botRemaining - 1);
+        newBoard[newIndex] = botPiece;
       }
-      newBoard[newIndex] = num;
     } else {
       // move piece
       // reject if there's remaining pieces
-      if (turn === playerOneId && playerOneRemaining > 0) {
+      if (turn === playerPiece && playerRemaining > 0) {
         return;
       }
-      if (turn === playerTwoId && playerTwoRemaining > 0) {
+      if (turn === botPiece && botRemaining > 0) {
         return;
       }
+
       // if num does not match old index then return.
-      if (board[oldIndex] != num) {
+      if (turn === playerPiece && board[oldIndex] != playerPiece) {
+        return;
+      }
+      if (turn === botPiece && board[oldIndex] != botPiece) {
         return;
       }
 
@@ -145,20 +150,29 @@ export default function PlayPage() {
         return;
       }
       newBoard[oldIndex] = 0;
-      newBoard[newIndex] = num;
+      if (turn === playerPiece) {
+        newBoard[newIndex] = playerPiece;
+      } else {
+        newBoard[newIndex] = botPiece;
+      }
     }
 
     setPressedIndex(-1);
     setBoard(newBoard);
-    checkWin(newBoard, num);
+    checkWin(newBoard, turn);
   };
 
   const handlePress = (index: number) => {
     // this function has two goals:
     // 1. set pressed index on its own piece
     // 2. call updateBoard
+    // reject if it's bot's turn
+    console.log("what handle press thinks turn:", turn);
+    console.log("player turn:", playerPiece);
 
-    let num = getPieceNum();
+    if (turn !== playerPiece) {
+      return;
+    }
 
     // new piece
     if (board[index] === 0 && pressedIndex === -1) {
@@ -168,22 +182,26 @@ export default function PlayPage() {
     }
 
     // player clicks its own piece to move
-    if (board[index] != 0 && pressedIndex === -1 && board[index] === num) {
+    if (
+      board[index] != 0 &&
+      pressedIndex === -1 &&
+      board[index] === playerPiece
+    ) {
       setPressedIndex(index);
       return;
     }
 
     // cancelling selected piece
-    if (index === pressedIndex && board[index] === num) {
+    if (index === pressedIndex && board[index] === playerPiece) {
       setPressedIndex(-1);
       return;
     }
 
     // Player is changing what piece to move
     if (
-      board[index] === num &&
+      board[index] === playerPiece &&
       pressedIndex != -1 &&
-      board[pressedIndex] === num
+      board[pressedIndex] === playerPiece
     ) {
       setPressedIndex(index);
       return;
@@ -191,9 +209,9 @@ export default function PlayPage() {
 
     // player is moving the previous piece to a new empty index
     if (
-      playersRemaining[num - 1] <= 0 &&
+      playerRemaining <= 0 &&
       pressedIndex != -1 &&
-      board[pressedIndex] === num
+      board[pressedIndex] === playerPiece
     ) {
       updateBoard(index, pressedIndex);
       return;
@@ -202,36 +220,78 @@ export default function PlayPage() {
 
   const resetGame = () => {
     setBoard(Array.from({ length: 9 }, () => 0));
-    setPlayerOneRemaining(3);
-    setPlayerTwoRemaining(3);
+    setPlayerRemaining(3);
+    setBotRemaining(3);
     setPressedIndex(-1);
     setWinner(0);
+    setTurn(1);
 
     // randomize player one and player two
     if (Math.random() < 0.5) {
-      setPlayerOneId("Player");
-      setPlayerTwoId("Bot");
+      setPlayerPiece(1);
+      setBotPiece(2);
+      bot.changePiece(2);
     } else {
-      setPlayerOneId("Bot");
-      setPlayerTwoId("Player");
+      setBotPiece(1);
+      setPlayerPiece(2);
+      bot.changePiece(1);
     }
-    // setModalText("Game is started");
-    // setModalVisible(true);
+
+    console.log("");
+    console.log("turn:", turn);
+    console.log("player piece:", playerPiece);
+    console.log("bot piece:", botPiece);
+    console.log("");
+  };
+
+  const letBotPlay = () => {
+    // let bot play
+    // reject if it's not bot's turn
+    if (turn != botPiece) {
+      console.log("it is not bot's turn");
+      return;
+    } else {
+      console.log("it is bot's turn");
+    }
+
+    if (botRemaining > 0) {
+      let [newIndex, oldIndex] = bot.play(board, false);
+        updateBoard(newIndex);
+        changeTurn();
+    } else {
+      let [newIndex, oldIndex] = bot.play(board, true);
+        updateBoard(newIndex, oldIndex);
+        changeTurn();
+    }
+    console.log("board:", board);
+  };
+
+  const changeTurn = () => {
+    setTurn(turn === 1 ? 2 : 1);
   };
 
   return (
     <View style={styles.container}>
       {modalView()}
-      <Text style={[styles.title, { color: turnColor }]}>
-        {winner !== 0 ? `Player ${winner}'s Victory!` : `${turn}'s ${turnText}`}
+      <Text style={[styles.title]}>
+        Player is {playerPiece === 1 ? "black" : "white"}
       </Text>
-      {/* <Text style={[styles.title]}>{winner}</Text> */}
       <Board
         board={board}
-        handlePress={handlePress}
+        handlePress={(index) => {
+          handlePress(index);
+            letBotPlay();
+        }}
         pressedIndex={pressedIndex}
       />
-      <TouchableOpacity onPress={resetGame} style={styles.button}>
+      <TouchableOpacity
+        onPress={() => {
+                  resetGame();
+                new Promise( resolve => setTimeout(resolve, 1000) );
+          letBotPlay();
+        }}
+        style={styles.button}
+      >
         <Text style={styles.buttonText}>New Game</Text>
       </TouchableOpacity>
       {/* <Link href="/homepage" asChild>
