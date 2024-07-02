@@ -1,69 +1,57 @@
 type Position = { row: number; col: number };
 
-export function indexToRowCol(index: number): Position {
-  const row = Math.floor(index / 3);
-  const col = index % 3;
+export function isValidMove(oldIndex: number, newIndex: number): boolean {
+  // possible moves
+  const possibleMoves: number[][] = [
+    [0, 1],
+    [0, 3],
+    [0, 4],
+    [1, 2],
+    [1, 4],
+    [2, 4],
+    [2, 5],
+    [3, 4],
+    [3, 6],
+    [4, 5],
+    [4, 6],
+    [4, 7],
+    [4, 8],
+    [5, 8],
+    [6, 7],
+    [7, 8],
+  ];
 
-  return { row, col };
+  // check if oldIndex and newIndex are in possibleMoves, order insensitive
+  for (let i = 0; i < possibleMoves.length; i++) {
+    if (
+      (possibleMoves[i][0] === oldIndex && possibleMoves[i][1] === newIndex) ||
+      (possibleMoves[i][1] === oldIndex && possibleMoves[i][0] === newIndex)
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
-export function isValidMove(oldIndex: number, newIndex: number): boolean {
-  // Convert index to row and column
-  const { row: oldRow, col: oldCol } = indexToRowCol(oldIndex);
-  const { row: newRow, col: newCol } = indexToRowCol(newIndex);
-
-  // possible moves:
-  // +/- column
-  // +/- row
-  // col+1 and row+1
-  // col-1 and row-1
-  // It calculates the absolute difference between the old and new row and column, and checks if these differences are at most 1.
-  const exceptions: [Position, Position][] = [
-    [
-      { row: 0, col: 1 },
-      { row: 1, col: 0 },
-    ],
-    [
-      { row: 0, col: 1 },
-      { row: 1, col: 2 },
-    ],
-    [
-      { row: 1, col: 0 },
-      { row: 2, col: 1 },
-    ],
-    [
-      { row: 2, col: 1 },
-      { row: 1, col: 2 },
-    ],
-  ];
-
-  const currentMove: [Position, Position] = [
-    { row: oldRow, col: oldCol },
-    { row: newRow, col: newCol },
-  ];
-  const reverseMove: [Position, Position] = [
-    { row: newRow, col: newCol },
-    { row: oldRow, col: oldCol },
-  ];
-
-  if (
-    exceptions.some(
-      (exception) =>
-        (exception[0].row === currentMove[0].row &&
-          exception[0].col === currentMove[0].col &&
-          exception[1].row === currentMove[1].row &&
-          exception[1].col === currentMove[1].col) ||
-        (exception[0].row === reverseMove[0].row &&
-          exception[0].col === reverseMove[0].col &&
-          exception[1].row === reverseMove[1].row &&
-          exception[1].col === reverseMove[1].col)
-    )
-  ) {
+export function checkIndexMovePossible(
+  board: number[],
+  piece: number,
+  oldIndex: number,
+  targetIndex: number
+): boolean {
+  // invalid if old index does not belong to piece
+  if (board[oldIndex] != piece) {
     return false;
   }
 
-  const rowDiff = Math.abs(oldRow - newRow);
-  const colDiff = Math.abs(oldCol - newCol);
+  // can't move to an occupied position
+  if (board[targetIndex] != 0) {
+    return false;
+  }
 
-  return rowDiff <= 1 && colDiff <= 1;
+  if (isValidMove(oldIndex, targetIndex)) {
+    return true;
+  }
+
+  return false;
 }

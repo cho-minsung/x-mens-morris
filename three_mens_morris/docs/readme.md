@@ -77,3 +77,10 @@ Server ->>+ Database: OngoingGame { move }
 Database ->>- Server: Ok
 Server ->> Player: OngoingGame
 ```
+
+# frontend play
+
+1. Player places a new piece
+2. Check for win
+3. Bot places a new piece
+4. Check for win

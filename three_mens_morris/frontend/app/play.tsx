@@ -6,7 +6,7 @@ import { colorPalette } from "./colors";
 
 import { Board } from "../components/Board";
 import Bot from "../components/Bot";
-import { isValidMove, indexToRowCol } from "../components/Rules";
+import { isValidMove } from "../components/Rules";
 
 export default function PlayPage() {
   const bot = new Bot;
@@ -209,9 +209,6 @@ export default function PlayPage() {
       >
         <Text style={styles.buttonText}>New Game</Text>
       </TouchableOpacity>
-      {/* <Link href="/homepage" asChild>
-        
-      </Link> */}
     </View>
   );
 }

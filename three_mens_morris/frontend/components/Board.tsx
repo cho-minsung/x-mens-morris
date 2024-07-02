@@ -81,7 +81,7 @@ export const Board: React.FC<BoardProps> = ({ board, handlePress, pressedIndex }
                   activeOpacity={1}
                   onPress={() => handlePress(index)}
                 >
-                  <Text>{board[index]}</Text>
+                  {/* <Text>{board[index]}</Text> */}
                 </TouchableOpacity>
               );
             })}
