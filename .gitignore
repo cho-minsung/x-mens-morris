@@ -17,3 +17,7 @@ Cargo.lock
 *.csv
 
 .DS_Store
+
+__pycache__/
+
+.venv
