@@ -1,0 +1,593 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EA00B2C52C33B99F00B0D4AF /* three_mens_morrisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA00B2C42C33B99F00B0D4AF /* three_mens_morrisApp.swift */; };
+		EA00B2C72C33B99F00B0D4AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA00B2C62C33B99F00B0D4AF /* ContentView.swift */; };
+		EA00B2C92C33B9A000B0D4AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA00B2C82C33B9A000B0D4AF /* Assets.xcassets */; };
+		EA00B2CC2C33B9A000B0D4AF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA00B2CB2C33B9A000B0D4AF /* Preview Assets.xcassets */; };
+		EA00B2D62C33B9A000B0D4AF /* three_mens_morrisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA00B2D52C33B9A000B0D4AF /* three_mens_morrisTests.swift */; };
+		EA00B2E02C33B9A000B0D4AF /* three_mens_morrisUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA00B2DF2C33B9A000B0D4AF /* three_mens_morrisUITests.swift */; };
+		EA00B2E22C33B9A000B0D4AF /* three_mens_morrisUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA00B2E12C33B9A000B0D4AF /* three_mens_morrisUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EA00B2D22C33B9A000B0D4AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EA00B2B92C33B99F00B0D4AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EA00B2C02C33B99F00B0D4AF;
+			remoteInfo = "three mens morris";
+		};
+		EA00B2DC2C33B9A000B0D4AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EA00B2B92C33B99F00B0D4AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EA00B2C02C33B99F00B0D4AF;
+			remoteInfo = "three mens morris";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		EA00B2C12C33B99F00B0D4AF /* three mens morris.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "three mens morris.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA00B2C42C33B99F00B0D4AF /* three_mens_morrisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = three_mens_morrisApp.swift; sourceTree = "<group>"; };
+		EA00B2C62C33B99F00B0D4AF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EA00B2C82C33B9A000B0D4AF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EA00B2CB2C33B9A000B0D4AF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		EA00B2D12C33B9A000B0D4AF /* three mens morrisTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "three mens morrisTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA00B2D52C33B9A000B0D4AF /* three_mens_morrisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = three_mens_morrisTests.swift; sourceTree = "<group>"; };
+		EA00B2DB2C33B9A000B0D4AF /* three mens morrisUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "three mens morrisUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA00B2DF2C33B9A000B0D4AF /* three_mens_morrisUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = three_mens_morrisUITests.swift; sourceTree = "<group>"; };
+		EA00B2E12C33B9A000B0D4AF /* three_mens_morrisUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = three_mens_morrisUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EA00B2BE2C33B99F00B0D4AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA00B2CE2C33B9A000B0D4AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA00B2D82C33B9A000B0D4AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EA00B2B82C33B99F00B0D4AF = {
+			isa = PBXGroup;
+			children = (
+				EA00B2C32C33B99F00B0D4AF /* three mens morris */,
+				EA00B2D42C33B9A000B0D4AF /* three mens morrisTests */,
+				EA00B2DE2C33B9A000B0D4AF /* three mens morrisUITests */,
+				EA00B2C22C33B99F00B0D4AF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EA00B2C22C33B99F00B0D4AF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EA00B2C12C33B99F00B0D4AF /* three mens morris.app */,
+				EA00B2D12C33B9A000B0D4AF /* three mens morrisTests.xctest */,
+				EA00B2DB2C33B9A000B0D4AF /* three mens morrisUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EA00B2C32C33B99F00B0D4AF /* three mens morris */ = {
+			isa = PBXGroup;
+			children = (
+				EA00B2C42C33B99F00B0D4AF /* three_mens_morrisApp.swift */,
+				EA00B2C62C33B99F00B0D4AF /* ContentView.swift */,
+				EA00B2C82C33B9A000B0D4AF /* Assets.xcassets */,
+				EA00B2CA2C33B9A000B0D4AF /* Preview Content */,
+			);
+			path = "three mens morris";
+			sourceTree = "<group>";
+		};
+		EA00B2CA2C33B9A000B0D4AF /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				EA00B2CB2C33B9A000B0D4AF /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		EA00B2D42C33B9A000B0D4AF /* three mens morrisTests */ = {
+			isa = PBXGroup;
+			children = (
+				EA00B2D52C33B9A000B0D4AF /* three_mens_morrisTests.swift */,
+			);
+			path = "three mens morrisTests";
+			sourceTree = "<group>";
+		};
+		EA00B2DE2C33B9A000B0D4AF /* three mens morrisUITests */ = {
+			isa = PBXGroup;
+			children = (
+				EA00B2DF2C33B9A000B0D4AF /* three_mens_morrisUITests.swift */,
+				EA00B2E12C33B9A000B0D4AF /* three_mens_morrisUITestsLaunchTests.swift */,
+			);
+			path = "three mens morrisUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EA00B2C02C33B99F00B0D4AF /* three mens morris */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA00B2E52C33B9A000B0D4AF /* Build configuration list for PBXNativeTarget "three mens morris" */;
+			buildPhases = (
+				EA00B2BD2C33B99F00B0D4AF /* Sources */,
+				EA00B2BE2C33B99F00B0D4AF /* Frameworks */,
+				EA00B2BF2C33B99F00B0D4AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "three mens morris";
+			productName = "three mens morris";
+			productReference = EA00B2C12C33B99F00B0D4AF /* three mens morris.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EA00B2D02C33B9A000B0D4AF /* three mens morrisTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA00B2E82C33B9A000B0D4AF /* Build configuration list for PBXNativeTarget "three mens morrisTests" */;
+			buildPhases = (
+				EA00B2CD2C33B9A000B0D4AF /* Sources */,
+				EA00B2CE2C33B9A000B0D4AF /* Frameworks */,
+				EA00B2CF2C33B9A000B0D4AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EA00B2D32C33B9A000B0D4AF /* PBXTargetDependency */,
+			);
+			name = "three mens morrisTests";
+			productName = "three mens morrisTests";
+			productReference = EA00B2D12C33B9A000B0D4AF /* three mens morrisTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EA00B2DA2C33B9A000B0D4AF /* three mens morrisUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA00B2EB2C33B9A000B0D4AF /* Build configuration list for PBXNativeTarget "three mens morrisUITests" */;
+			buildPhases = (
+				EA00B2D72C33B9A000B0D4AF /* Sources */,
+				EA00B2D82C33B9A000B0D4AF /* Frameworks */,
+				EA00B2D92C33B9A000B0D4AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EA00B2DD2C33B9A000B0D4AF /* PBXTargetDependency */,
+			);
+			name = "three mens morrisUITests";
+			productName = "three mens morrisUITests";
+			productReference = EA00B2DB2C33B9A000B0D4AF /* three mens morrisUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EA00B2B92C33B99F00B0D4AF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					EA00B2C02C33B99F00B0D4AF = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					EA00B2D02C33B9A000B0D4AF = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = EA00B2C02C33B99F00B0D4AF;
+					};
+					EA00B2DA2C33B9A000B0D4AF = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = EA00B2C02C33B99F00B0D4AF;
+					};
+				};
+			};
+			buildConfigurationList = EA00B2BC2C33B99F00B0D4AF /* Build configuration list for PBXProject "three mens morris" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EA00B2B82C33B99F00B0D4AF;
+			productRefGroup = EA00B2C22C33B99F00B0D4AF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EA00B2C02C33B99F00B0D4AF /* three mens morris */,
+				EA00B2D02C33B9A000B0D4AF /* three mens morrisTests */,
+				EA00B2DA2C33B9A000B0D4AF /* three mens morrisUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EA00B2BF2C33B99F00B0D4AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA00B2CC2C33B9A000B0D4AF /* Preview Assets.xcassets in Resources */,
+				EA00B2C92C33B9A000B0D4AF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA00B2CF2C33B9A000B0D4AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA00B2D92C33B9A000B0D4AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EA00B2BD2C33B99F00B0D4AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA00B2C72C33B99F00B0D4AF /* ContentView.swift in Sources */,
+				EA00B2C52C33B99F00B0D4AF /* three_mens_morrisApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA00B2CD2C33B9A000B0D4AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA00B2D62C33B9A000B0D4AF /* three_mens_morrisTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA00B2D72C33B9A000B0D4AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA00B2E22C33B9A000B0D4AF /* three_mens_morrisUITestsLaunchTests.swift in Sources */,
+				EA00B2E02C33B9A000B0D4AF /* three_mens_morrisUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EA00B2D32C33B9A000B0D4AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EA00B2C02C33B99F00B0D4AF /* three mens morris */;
+			targetProxy = EA00B2D22C33B9A000B0D4AF /* PBXContainerItemProxy */;
+		};
+		EA00B2DD2C33B9A000B0D4AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EA00B2C02C33B99F00B0D4AF /* three mens morris */;
+			targetProxy = EA00B2DC2C33B9A000B0D4AF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EA00B2E32C33B9A000B0D4AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EA00B2E42C33B9A000B0D4AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EA00B2E62C33B9A000B0D4AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"three mens morris/Preview Content\"";
+				DEVELOPMENT_TEAM = 8TCMA23VNJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "minsung.three-mens-morris";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EA00B2E72C33B9A000B0D4AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"three mens morris/Preview Content\"";
+				DEVELOPMENT_TEAM = 8TCMA23VNJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "minsung.three-mens-morris";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EA00B2E92C33B9A000B0D4AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8TCMA23VNJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "minsung.three-mens-morrisTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/three mens morris.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/three mens morris";
+			};
+			name = Debug;
+		};
+		EA00B2EA2C33B9A000B0D4AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8TCMA23VNJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "minsung.three-mens-morrisTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/three mens morris.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/three mens morris";
+			};
+			name = Release;
+		};
+		EA00B2EC2C33B9A000B0D4AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8TCMA23VNJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "minsung.three-mens-morrisUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "three mens morris";
+			};
+			name = Debug;
+		};
+		EA00B2ED2C33B9A000B0D4AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8TCMA23VNJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "minsung.three-mens-morrisUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "three mens morris";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EA00B2BC2C33B99F00B0D4AF /* Build configuration list for PBXProject "three mens morris" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA00B2E32C33B9A000B0D4AF /* Debug */,
+				EA00B2E42C33B9A000B0D4AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA00B2E52C33B9A000B0D4AF /* Build configuration list for PBXNativeTarget "three mens morris" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA00B2E62C33B9A000B0D4AF /* Debug */,
+				EA00B2E72C33B9A000B0D4AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA00B2E82C33B9A000B0D4AF /* Build configuration list for PBXNativeTarget "three mens morrisTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA00B2E92C33B9A000B0D4AF /* Debug */,
+				EA00B2EA2C33B9A000B0D4AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA00B2EB2C33B9A000B0D4AF /* Build configuration list for PBXNativeTarget "three mens morrisUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA00B2EC2C33B9A000B0D4AF /* Debug */,
+				EA00B2ED2C33B9A000B0D4AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EA00B2B92C33B99F00B0D4AF /* Project object */;
+}

@@ -299,10 +299,8 @@ export default class Bot {
 
   play_move(board: number[]): [number, number] {
     // returns [old index, new index]
-    // initialize all variables
-    let winnable, index;
     // check if bot can win
-    [winnable, index] = this.checkWinningIndex(board, 2);
+    var [winnable, index] = this.checkWinningIndex(board, 2);
     console.log("winnable:", winnable, "index:", index);
     if (winnable) {
       let winMovePossible, oldIndex, newIndex;
@@ -314,25 +312,21 @@ export default class Bot {
     }
 
     // check if bot needs to block opponent
-    let opponentWinnable, opponentOldIndex, opponentNewIndex;
-    [opponentWinnable, opponentOldIndex, opponentNewIndex] =
+    var [opponentWinnable, opponentOldIndex, opponentNewIndex] =
       this.getWinningMove(board, 1);
 
     // block if necessary
     if (opponentWinnable) {
-      let blockingIndex = opponentNewIndex as number;
-      let opponentBlockable, oldIndexToBlock;
-      [opponentBlockable, oldIndexToBlock] = this.getRandomMoveToIndex(
+      var [opponentBlockable, oldIndexToBlock] = this.getRandomMoveToIndex(
         board,
         2,
-        blockingIndex
+        opponentNewIndex as number
       );
-      let oldIndexToMove = oldIndexToBlock as number;
-      console.log("target move", blockingIndex);
-      console.log("from", oldIndexToMove);
+      console.log("target move", opponentNewIndex);
+      console.log("from", oldIndexToBlock);
       if (opponentBlockable) {
         console.log("blocking opponent move from", oldIndexToBlock, "to", opponentNewIndex);
-        return [oldIndexToMove, blockingIndex];
+        return [oldIndexToBlock as number, opponentNewIndex as number];
       }
       // bot lost the game. make random move
       return this.getRandMove(board, 2);
