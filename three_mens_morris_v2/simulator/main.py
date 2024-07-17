@@ -1,4 +1,3 @@
-import copy
 import json
 from rules import check_win
 from bot import Bot
@@ -40,6 +39,9 @@ class Node:
         # "0_1" -> [[0], []]
         # "01_2" -> [[0, 1], [2]]
         # "01_23" -> [[0, 1], [2, 3]]
+        # if there is a dash then it is the 9th layer
+        if key[-1] == "-":
+            key = key[:-1]
 
         # split the key into two parts
         player_1, player_2 = key.split("_")
@@ -48,7 +50,11 @@ class Node:
         return [player_1, player_2]
     
     def print(self):
-        print(f"{self.layer} {self.board} {self.game_over} {self.wins}")
+        if self.layer >= 8 and self.layer % 2 == 0:
+            board  = f"{self.board}-"
+        else:
+            board = self.board
+        print(f"{self.layer} {board} {self.game_over} {self.wins}")
         if len(self.children) == 0:
             return
         for child in self.children:
@@ -91,6 +97,15 @@ def get_nodes_from_file(file: str) -> list[Node]:
             ))
     return node_list
 
+def get_dict_from_node_list(node_list: list[Node]) -> dict:
+    new_dict = {}
+    for node in node_list:
+        if node.layer == 8:
+            new_dict[str(board_to_key(node.board)+"-")] = node.to_dict()
+        else:
+            new_dict[board_to_key(node.board)] = node.to_dict()
+    return new_dict
+
 def find_board_and_layer(node_list: list[Node], board: list[list[int]], layer: int):
     for node in node_list:
         if node.layer == layer and node.board == board:
@@ -104,13 +119,10 @@ def expand(node_list: list[Node]):
         if node.layer % 2 == 0:
             new_boards = botZero.get_all_moves(node.board)
             for new_board in new_boards:
-                # print("new board", new_board)
                 if new_board not in [node.board for node in node_list]:
                     new_node = Node(node.layer + 1, board_to_key(new_board))
                     new_next_boards = botOne.get_all_moves(new_board)
-                    # print("new next boards", new_next_boards)
                     new_node.children = [board_to_key(new_next_board) for new_next_board in new_next_boards]
-                    # user_input = input("continue?")
                     if check_win(new_board, 0):
                         new_node.game_over = True
                     node_list.append(new_node)
@@ -119,137 +131,103 @@ def expand(node_list: list[Node]):
         else:
             new_boards = botOne.get_all_moves(node.board)
             for new_board in new_boards:
-                # print("new board", new_board)
                 if new_board not in [node.board for node in node_list]:
                     new_node = Node(node.layer + 1, board_to_key(new_board))
                     new_next_boards = botZero.get_all_moves(new_board)
                     new_node.children = [board_to_key(new_next_board) for new_next_board in new_next_boards]
-                    # print("new next boards", new_next_boards)
-                    # user_input = input("continue?")
                     if check_win(new_board, 1):
                         new_node.game_over = True
                     node_list.append(new_node)
                     new += 1
                     continue
+
+    # additionally add 8th layer
+    for node in [node for node in node_list if node.layer == 6]:
+        new_boards = botOne.get_all_moves(node.board)
+        for new_board in new_boards:
+            new_node = Node(8, board_to_key(new_board) + "-")
+            if check_win(new_board, 1):
+                new_node.game_over = True
+            node_list.append(new_node)
+            new += 1
+        
+            new_next_boards = botZero.get_all_moves(new_board)
+            new_node.children = [board_to_key(new_next_board) for new_next_board in new_next_boards]
+                    
     print("new nodes", new)
 
-nodes = get_nodes_from_file("empty_weight.json")
+node_list = get_nodes_from_file("weight.json")
 
-expand(nodes)
+# expand(node_list)
+# for node in node_list:
+#     node.print()
+node_dict = get_dict_from_node_list(node_list)
 
-new_dict = {}
-for node in nodes:
-    new_dict[board_to_key(node.board)] = node.to_dict()
+# with open("expanded1.json", "w") as f:
+#     json.dump(node_dict, f, indent=4)
 
-with open("expanded.json", "w") as f:
-    json.dump(new_dict, f)
-
-exit()
-
-def play_game(base_weight: Node):
+def play_game() -> tuple[list[Node], int]:
     # initialize the game data
     # to update win for layer and board match
-    move_history = []
-    state = 0
-    game_over: bool = False
-    winner = None
-    layer = 1
-    current_node = base_weight
-    while game_over == False:
-        board = current_node.board
-        if state == 0:
-            new_board = botZero.make_move(board)
-            # check if the new board is already in the children
-            while new_board not in [child.board for child in current_node.children]:
-                new_board = botZero.make_move(board)
-                new_node = Node(layer, new_board)
-            if not check_win(new_board, 0):
-                state = 1
-                layer += 1
-                # new_node.print()
-                current_node.children.append(new_node)
-                current_node = new_node
-                continue
-            new_node.game_over = True
-            # new_node.print()
-            winner = 0
-            current_node.children.append(new_node)
-            current_node = new_node
-            game_over = True
-        else:
-            board = botOne.make_move(board)
-            new_node = Node(layer, copy.deepcopy(board))
-            if not check_win(board, 1):
-                state = 0
-                layer += 1
-                # new_node.print()
-                current_node.children.append(new_node)
-                current_node = new_node
-                continue
-            new_node.game_over = True
-            # new_node.print()
-            winner = 1
-            current_node.children.append(new_node)
-            current_node = new_node
-            game_over = True
-
-    # winner is current state
-    # print("winner:", winner)
-    # print("layer:", layer)
-
-    backpropagate(init_node, winner)
-
-    return init_node, layer
-
-
-# iterate through it and update wins and visits
-def backpropagate(node: Node, winner: int):
-    node.visits += 1
-    if (winner == 0 and node.layer % 2 == 1) or (winner == 1 and node.layer % 2 == 0):
-            node.wins += 1
-    for child in node.children:
-        backpropagate(child, winner)
-
-
-def update_weight(base_weight: Node, new_game: Node):
-    hit = False
-    current_branch = base_weight
-    current_node = new_game
+    node_history: list[Node] = []
+    layer = 0
+    base_node = Node(layer, "_")
+    current_node = base_node
+    node_history.append(base_node)
     while 1:
-        # print(f"current branch: {current_branch.layer} {current_branch.board}")
-        # print(f"current node: {current_node.layer} {current_node.board}")
-        if current_branch.layer == current_node.layer and current_branch.board == current_node.board:
-            # print("current node children count", len(current_node.children))
-            # print("same layer same board. moving to next layer")
-            current_branch.visits += current_node.visits
-            current_branch.wins += current_node.wins
-            # current is only one line
-            # print(len(current_node.children))
-            if len(current_node.children) == 0:
-                return False
-            current_node = current_node.children[0]
-            continue
-        if current_branch.layer == current_node.layer - 1:
-            # print("checking within children")
-            if current_branch.children == []:
-                current_branch.children.append(current_node)
-                return True
-            # check if current node board is in the children
-            if current_node.board in [child.board for child in current_branch.children]:
-                # print("found child")
-                for child in current_branch.children:
-                    if child.board == current_node.board:
-                        current_branch = child
-                        break
-                continue
-            # print("adding node to branch")
-            current_branch.children.append(current_node)
-            return True
-    return hit
+        board = current_node.board
+        if current_node.layer % 2 == 0:
+            layer += 1
+            new_board = botZero.make_move(board)
+            if new_board == []:
+                current_node.game_over = True
+                return node_history, 1
+            new_node = Node(layer, board_to_key(new_board))
+            node_history.append(new_node)
+            if check_win(new_board, 0):
+                new_node.game_over = True
+                return node_history, 0
+            current_node = new_node
+        else:
+            layer += 1
+            new_board = botOne.make_move(board)
+            if new_board == []:
+                current_node.game_over = True
+                return node_history, 0
+            new_node = Node(layer, board_to_key(new_board))
+            node_history.append(new_node)
+            if check_win(board, 1):
+                new_node.game_over = True
+                return node_history, 1
+            current_node = new_node
 
-with open("empty_weight.json", "r") as f:
-    weight = json.load(f)
-    weight = Node().from_dict(weight)
+    return node_history, 0
+
+def back_propagate(node_history: list[Node], winner: int):
+    for node in node_history:
+        node.visits += 1
+        if winner == node.layer % 2:
+            node.wins += 1
+
+def update_weight(nodes: dict, node_history: list[Node]):
+    for node in node_history:
+        key = board_to_key(node.board)
+        if node.layer >= 8 and node.layer % 2 == 0:
+            key += "-"
+        if key[-1] == "-" and node.layer % 2 == 1:
+            key = key[:-1]
+        nodes[key]["wins"] += 1
+        nodes[key]["visits"] += 1
+        nodes[key]["wins"] += node.wins
+        nodes[key]["visits"] += node.visits
+
+for i in range(800000):
+    node_history, winner = play_game()
+    back_propagate(node_history, winner)
+    update_weight(node_dict, node_history)
+
+with open("weight.json", "w") as f:
+    json.dump(node_dict, f, indent=2)
 
 # while 1:
 #     hit_count = 0

@@ -1,8 +1,0 @@
-{
-  "board": "_",
-  "current_turn": 0,
-  "wins": 0,
-  "visits": 0,
-  "game_over": false,
-  "children": []
-}
