@@ -99,16 +99,18 @@ def find_board_and_layer(node_list: list[Node], board: list[list[int]], layer: i
 def expand(node_list: list[Node]):
     new = 0
     for node in node_list:
-        if node.layer >= 6:
+        if node.layer >= 7:
             continue
         if node.layer % 2 == 0:
             new_boards = botZero.get_all_moves(node.board)
             for new_board in new_boards:
+                # print("new board", new_board)
                 if new_board not in [node.board for node in node_list]:
                     new_node = Node(node.layer + 1, board_to_key(new_board))
-                    new_next_boards = botOne.get_all_moves(new_node.board)
-                    for new_next_board in new_next_boards:
-                        new_node.children.append(board_to_key(new_next_board))
+                    new_next_boards = botOne.get_all_moves(new_board)
+                    # print("new next boards", new_next_boards)
+                    new_node.children = [board_to_key(new_next_board) for new_next_board in new_next_boards]
+                    # user_input = input("continue?")
                     if check_win(new_board, 0):
                         new_node.game_over = True
                     node_list.append(new_node)
@@ -117,11 +119,13 @@ def expand(node_list: list[Node]):
         else:
             new_boards = botOne.get_all_moves(node.board)
             for new_board in new_boards:
+                # print("new board", new_board)
                 if new_board not in [node.board for node in node_list]:
                     new_node = Node(node.layer + 1, board_to_key(new_board))
-                    new_next_boards = botZero.get_all_moves(new_node.board)
-                    for new_next_board in new_next_boards:
-                        new_node.children.append(board_to_key(new_next_board))
+                    new_next_boards = botZero.get_all_moves(new_board)
+                    new_node.children = [board_to_key(new_next_board) for new_next_board in new_next_boards]
+                    # print("new next boards", new_next_boards)
+                    # user_input = input("continue?")
                     if check_win(new_board, 1):
                         new_node.game_over = True
                     node_list.append(new_node)
